@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Dialogue Player</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+
+    margin: 0;
+
+    width: 100%;
+    height: 100%;
+
+    background: black;
+
+    overflow: hidden;
+
+    color: white;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    user-select: none;
+
+    -webkit-user-select: none;
+
+}
+
+body {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-end;
+
+}
+
+
+/* =========================
+   GAME SCREEN
+========================= */
+
+#game {
+
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    background: black;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: flex-end;
+
+}
+
+
+/* =========================
+   DIALOGUE BOX
+========================= */
+
+.dialogue {
+
+    position: relative;
+
+    width: min(
+        100vw,
+        1100px
+    );
+
+    margin-bottom: 15px;
+
+    display: none;
+
+}
+
+
+/* Keep original proportions */
+
+.dialogue-background {
+
+    width: 100%;
+
+    height: auto;
+
+    display: block;
+
+}
+
+
+/* =========================
+   CHARACTER
+========================= */
+
+.character {
+
+    position: absolute;
+
+    left: 5%;
+
+    bottom: 8%;
+
+    width: 20%;
+
+    height: 72%;
+
+    object-fit: contain;
+
+    object-position: bottom center;
+
+    image-rendering: pixelated;
+
+}
+
+
+/* =========================
+   TEXT
+========================= */
+
+.text {
+
+    position: absolute;
+
+    left: 29%;
+
+    right: 6%;
+
+    top: 25%;
+
+    bottom: 18%;
+
+    color: white;
+
+    font-family:
+        "8-bit Operator JVE",
+        "Courier New",
+        monospace;
+
+    font-size:
+        clamp(
+            14px,
+            2.4vw,
+            28px
+        );
+
+    line-height: 1.35;
+
+    white-space: pre-wrap;
+
+    overflow: hidden;
+
+}
+
+
+/* =========================
+   EVENT
+========================= */
+
+#eventScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    display: none;
+
+    justify-content: center;
+
+    align-items: center;
+
+    background: black;
+
+    z-index: 20;
+
+}
+
+
+.event-text {
+
+    font-family:
+        "8-bit Operator JVE",
+        "Courier New",
+        monospace;
+
+    font-size:
+        clamp(
+            18px,
+            4vw,
+            40px
+        );
+
+    text-align: center;
+
+}
+
+
+/* =========================
+   CLICK INDICATOR
+========================= */
+
+#continueIndicator {
+
+    position: absolute;
+
+    right: 3%;
+
+    bottom: 9%;
+
+    font-size: 18px;
+
+    animation:
+        blink 0.8s infinite;
+
+    display: none;
+
+}
+
+@keyframes blink {
+
+    50% {
+        opacity: 0.2;
+    }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    .dialogue {
+
+        width: 100%;
+
+        margin-bottom: 5px;
+
+    }
+
+    .text {
+
+        font-size:
+            clamp(
+                10px,
+                3.2vw,
+                18px
+            );
+
+    }
+
+    .character {
+
+        width: 21%;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div id="game">
+
+
+    <!-- DIALOGUE -->
+
+    <div
+        id="dialogue"
+        class="dialogue"
+    >
+
+        <img
+            class="dialogue-background"
+            src="https://i.ibb.co/21Z5G7Yn/Untitled7-20260815081350.png"
+        >
+
+
+        <img
+            id="character"
+            class="character"
+            src=""
+        >
+
+
+        <div
+            id="text"
+            class="text"
+        ></div>
+
+
+        <div
+            id="continueIndicator"
+        >
+            ▼
+        </div>
+
+    </div>
+
+
+    <!-- EVENTS -->
+
+    <div
+        id="eventScreen"
+    >
+
+        <div
+            id="eventText"
+            class="event-text"
+        ></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   SPRITES
+========================================== */
+
+const sprites = {
+
+    neutral:
+        "https://i.ibb.co/G4nYggzv/IMG-0004.jpg",
+
+    mad:
+        "https://i.ibb.co/gFHhswgR/IMG-0005.jpg"
+
+};
+
+
+/* ==========================================
+   PROJECT
+========================================== */
+
+const saved =
+    localStorage.getItem(
+        "deltaruneDialogueProject"
+    );
+
+
+if (!saved) {
+
+    document.body.innerHTML = `
+        <div style="
+            color:white;
+            font-family:Arial;
+            text-align:center;
+            padding:40px;
+        ">
+            No dialogue project found.
+        </div>
+    `;
+
+    throw new Error(
+        "No project"
+    );
+
+}
+
+
+const project =
+    JSON.parse(saved);
+
+
+const sequence =
+    project.sequence || [];
+
+
+let currentIndex = 0;
+
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
+const dialogue =
+    document.getElementById(
+        "dialogue"
+    );
+
+const character =
+    document.getElementById(
+        "character"
+    );
+
+const text =
+    document.getElementById(
+        "text"
+    );
+
+const indicator =
+    document.getElementById(
+        "continueIndicator"
+    );
+
+const eventScreen =
+    document.getElementById(
+        "eventScreen"
+    );
+
+const eventText =
+    document.getElementById(
+        "eventText"
+    );
+
+
+/* ==========================================
+   TYPING
+========================================== */
+
+let typing = false;
+
+let typingTimer = null;
+
+let currentFullText = "";
+
+let textPosition = 0;
+
+
+/* ==========================================
+   START
+========================================== */
+
+playCurrent();
+
+
+/* ==========================================
+   PLAY CURRENT
+========================================== */
+
+function playCurrent() {
+
+    if (
+        currentIndex >=
+        sequence.length
+    ) {
+
+        finish();
+
+        return;
+
+    }
+
+
+    const entry =
+        sequence[currentIndex];
+
+
+    if (
+        entry.type ===
+        "dialogue"
+    ) {
+
+        playDialogue(entry);
+
+    }
+
+    else if (
+        entry.type ===
+        "event"
+    ) {
+
+        playEvent(entry);
+
+    }
+
+}
+
+
+/* ==========================================
+   DIALOGUE
+========================================== */
+
+function playDialogue(entry) {
+
+    eventScreen.style.display =
+        "none";
+
+    dialogue.style.display =
+        "block";
+
+
+    character.src =
+        sprites[
+            entry.sprite
+        ] || sprites.neutral;
+
+
+    currentFullText =
+        entry.text || "";
+
+
+    textPosition = 0;
+
+    text.textContent = "";
+
+    typing = true;
+
+    indicator.style.display =
+        "none";
+
+
+    typeNextCharacter();
+
+}
+
+
+/* ==========================================
+   TYPE CHARACTER
+========================================== */
+
+function typeNextCharacter() {
+
+    if (
+        textPosition >=
+        currentFullText.length
+    ) {
+
+        typing = false;
+
+        indicator.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    text.textContent +=
+        currentFullText[
+            textPosition
+        ];
+
+
+    textPosition++;
+
+
+    /*
+        Adjust this number to change
+        typing speed.
+
+        Lower = faster.
+    */
+
+    typingTimer =
+        setTimeout(
+            typeNextCharacter,
+            35
+        );
+
+}
+
+
+/* ==========================================
+   ADVANCE
+========================================== */
+
+function advance() {
+
+    if (typing) {
+
+        clearTimeout(
+            typingTimer
+        );
+
+        text.textContent =
+            currentFullText;
+
+        textPosition =
+            currentFullText.length;
+
+        typing = false;
+
+        indicator.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    indicator.style.display =
+        "none";
+
+
+    currentIndex++;
+
+    playCurrent();
+
+}
+
+
+/* ==========================================
+   EVENTS
+========================================== */
+
+function playEvent(entry) {
+
+    dialogue.style.display =
+        "none";
+
+    eventScreen.style.display =
+        "flex";
+
+
+    eventText.textContent =
+        entry.text || "";
+
+
+    const duration =
+        Number(
+            entry.duration || 1000
+        );
+
+
+    /* LAUGH */
+
+    if (
+        entry.eventType ===
+        "laugh"
+    ) {
+
+        playLaugh(duration);
+
+    }
+
+
+    /* SHAKE */
+
+    else if (
+        entry.eventType ===
+        "shake"
+    ) {
+
+        playShake(duration);
+
+    }
+
+
+    /* PAUSE */
+
+    else {
+
+        setTimeout(
+            finishEvent,
+            duration
+        );
+
+    }
+
+}
+
+
+/* ==========================================
+   LAUGH EVENT
+========================================== */
+
+function playLaugh(duration) {
+
+    let start =
+        Date.now();
+
+
+    function laughAnimation() {
+
+        const elapsed =
+            Date.now() - start;
+
+
+        if (elapsed >= duration) {
+
+            document.body.style.transform =
+                "";
+
+            finishEvent();
+
+            return;
+
+        }
+
+
+        /*
+            Small screen movement to
+            make the laugh feel alive.
+        */
+
+        const offset =
+            Math.sin(
+                elapsed / 45
+            ) * 5;
+
+
+        document.body.style.transform =
+            `translateX(${offset}px)`;
+
+
+        requestAnimationFrame(
+            laughAnimation
+        );
+
+    }
+
+
+    laughAnimation();
+
+}
+
+
+/* ==========================================
+   SHAKE EVENT
+========================================== */
+
+function playShake(duration) {
+
+    const start =
+        Date.now();
+
+
+    function shake() {
+
+        const elapsed =
+            Date.now() - start;
+
+
+        if (elapsed >= duration) {
+
+            document.body.style.transform =
+                "";
+
+            finishEvent();
+
+            return;
+
+        }
+
+
+        const x =
+            (Math.random() - 0.5) * 14;
+
+        const y =
+            (Math.random() - 0.5) * 14;
+
+
+        document.body.style.transform =
+            `translate(${x}px, ${y}px)`;
+
+
+        requestAnimationFrame(
+            shake
+        );
+
+    }
+
+
+    shake();
+
+}
+
+
+/* ==========================================
+   FINISH EVENT
+========================================== */
+
+function finishEvent() {
+
+    document.body.style.transform =
+        "";
+
+    eventScreen.style.display =
+        "none";
+
+    currentIndex++;
+
+    playCurrent();
+
+}
+
+
+/* ==========================================
+   FINISH PROJECT
+========================================== */
+
+function finish() {
+
+    dialogue.style.display =
+        "none";
+
+    eventScreen.style.display =
+        "none";
+
+}
+
+
+/* ==========================================
+   KEYBOARD
+========================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key ===
+            "Enter"
+        ) {
+
+            event.preventDefault();
+
+            advance();
+
+        }
+
+    }
+);
+
+
+/* ==========================================
+   MOBILE TAP
+========================================== */
+
+document.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        /*
+            Ignore taps while an event
+            is running.
+        */
+
+        if (
+            eventScreen.style.display ===
+            "flex"
+        ) {
+
+            return;
+
+        }
+
+
+        advance();
+
+    }
+);
+
+</script>
+
+</body>
+</html>
