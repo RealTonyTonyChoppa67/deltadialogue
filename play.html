@@ -71,7 +71,7 @@ body {
 
 
 /* =========================================
-   DIALOGUE BOX
+   DIALOGUE
 ========================================= */
 
 .dialogue {
@@ -166,7 +166,7 @@ body {
 
 
 /* =========================================
-   CONTINUE INDICATOR
+   CONTINUE
 ========================================= */
 
 #continueIndicator {
@@ -191,6 +191,51 @@ body {
     50% {
         opacity: 0.2;
     }
+
+}
+
+
+/* =========================================
+   START SCREEN
+========================================= */
+
+#startScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: black;
+
+    z-index: 100;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    cursor: pointer;
+
+    font-family:
+        "8-bit Operator JVE",
+        "Courier New",
+        monospace;
+
+}
+
+
+#startText {
+
+    font-size:
+        clamp(
+            16px,
+            4vw,
+            30px
+        );
+
+    animation:
+        blink 1s infinite;
 
 }
 
@@ -233,53 +278,6 @@ body {
         );
 
     text-align: center;
-
-}
-
-
-/* =========================================
-   START SCREEN
-========================================= */
-
-#startScreen {
-
-    position: absolute;
-
-    inset: 0;
-
-    background: black;
-
-    z-index: 100;
-
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-
-    font-family:
-        "8-bit Operator JVE",
-        "Courier New",
-        monospace;
-
-    cursor: pointer;
-
-}
-
-
-#startText {
-
-    font-size:
-        clamp(
-            16px,
-            4vw,
-            30px
-        );
-
-    animation:
-        blink 1s infinite;
 
 }
 
@@ -330,13 +328,9 @@ body {
 <div id="game">
 
 
-    <!-- =====================================
-         START SCREEN
-    ====================================== -->
+    <!-- START -->
 
-    <div
-        id="startScreen"
-    >
+    <div id="startScreen">
 
         <div id="startText">
             TAP TO START
@@ -345,9 +339,7 @@ body {
     </div>
 
 
-    <!-- =====================================
-         DIALOGUE
-    ====================================== -->
+    <!-- DIALOGUE -->
 
     <div
         id="dialogue"
@@ -365,7 +357,7 @@ body {
             id="character"
             class="character"
             src=""
-            alt="Character"
+            alt=""
         >
 
 
@@ -384,9 +376,7 @@ body {
     </div>
 
 
-    <!-- =====================================
-         EVENT SCREEN
-    ====================================== -->
+    <!-- EVENTS -->
 
     <div
         id="eventScreen"
@@ -407,9 +397,16 @@ body {
 
 /* ==================================================
    CHARACTER SPRITES
+
+   ADD NEW CHARACTERS HERE
 ================================================== */
 
 const characters = {
+
+
+    /* ----------------------------------------------
+       SUSIE
+    ---------------------------------------------- */
 
     susie: {
 
@@ -440,6 +437,10 @@ const characters = {
     },
 
 
+    /* ----------------------------------------------
+       RALSEI
+    ---------------------------------------------- */
+
     ralsei: {
 
         happy:
@@ -459,105 +460,276 @@ const characters = {
 
     }
 
+
+    /*
+       ADD MORE CHARACTERS LIKE THIS:
+
+       noelle: {
+
+           happy:
+               "IMAGE URL",
+
+           worried:
+               "IMAGE URL"
+
+       }
+    */
+
 };
 
 
 /* ==================================================
-   VOICE SOURCES
-==================================================
+   CHARACTER VOICE FILES
 
-   The OGG files are directly beside play.html.
+   ADD NEW VOICE CLIPS HERE
 ================================================== */
 
-const voiceSources = {
+const voiceFiles = {
+
+
+    /* ----------------------------------------------
+       SUSIE
+    ---------------------------------------------- */
 
     susie:
-        new Audio("susie.ogg"),
+        "susie.ogg",
+
+
+    /* ----------------------------------------------
+       RALSEI
+    ---------------------------------------------- */
 
     ralsei:
-        new Audio("ralsei.ogg")
+        "ralsei.ogg"
+
+
+    /*
+       ADD ANOTHER CHARACTER LIKE THIS:
+
+       noelle:
+           "noelle.ogg"
+
+    */
 
 };
 
 
-voiceSources.susie.preload =
-    "auto";
+/* ==================================================
+   AUDIO ENGINE
+================================================== */
 
-voiceSources.ralsei.preload =
-    "auto";
+let audioContext =
+    null;
 
 
-voiceSources.susie.volume =
-    0.25;
+const voiceBuffers =
+    {};
 
-voiceSources.ralsei.volume =
-    0.25;
+
+let audioReady =
+    false;
 
 
 /* ==================================================
-   VOICE PLAYBACK
-==================================================
-
-   Every letter gets its own cloned audio
-   instance.
-
+   LOAD VOICES
 ================================================== */
 
-function playVoice(
-    characterName
-) {
-
-    const source =
-        voiceSources[
-            characterName
-        ];
+async function prepareAudio() {
 
 
-    if (!source) {
+    if (audioReady) {
 
         return;
 
     }
 
 
-    const audio =
-        source.cloneNode(
-            true
-        );
+    /*
+       Create AudioContext after
+       the user taps the screen.
+    */
+
+    audioContext =
+        new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
 
 
-    audio.volume =
-        0.25;
+    /*
+       Some mobile browsers start
+       the context suspended.
+    */
+
+    if (
+        audioContext.state ===
+        "suspended"
+    ) {
+
+        await audioContext.resume();
+
+    }
 
 
-    audio.playbackRate =
-        0.95 +
-        Math.random() * 0.10;
+    /*
+       Load every character's
+       voice file.
+    */
+
+    for (
+        const characterName
+        in voiceFiles
+    ) {
 
 
-    audio.play()
-        .catch(
-            () => {}
-        );
+        try {
+
+            const response =
+                await fetch(
+                    voiceFiles[
+                        characterName
+                    ]
+                );
 
 
-    audio.addEventListener(
-        "ended",
-        function() {
+            if (
+                !response.ok
+            ) {
 
-            audio.remove();
+                console.error(
+                    "Voice file not found:",
+                    voiceFiles[
+                        characterName
+                    ]
+                );
 
-        },
-        {
-            once: true
+                continue;
+
+            }
+
+
+            const data =
+                await response.arrayBuffer();
+
+
+            voiceBuffers[
+                characterName
+            ] =
+                await audioContext.decodeAudioData(
+                    data
+                );
+
+
         }
-    );
+
+        catch (error) {
+
+            console.error(
+                "Failed to load voice:",
+                characterName,
+                error
+            );
+
+        }
+
+    }
+
+
+    audioReady =
+        true;
 
 }
 
 
 /* ==================================================
-   PROJECT
+   PLAY VOICE
+================================================== */
+
+function playVoice(
+    characterName
+) {
+
+
+    if (
+        !audioContext
+    ) {
+
+        return;
+
+    }
+
+
+    const buffer =
+        voiceBuffers[
+            characterName
+        ];
+
+
+    if (!buffer) {
+
+        return;
+
+    }
+
+
+    /*
+       Create a fresh Web Audio
+       source.
+
+       Unlike HTML Audio,
+       this does NOT create another
+       DOM element or reload the file.
+    */
+
+    const source =
+        audioContext.createBufferSource();
+
+
+    source.buffer =
+        buffer;
+
+
+    /*
+       Volume control.
+    */
+
+    const gain =
+        audioContext.createGain();
+
+
+    gain.gain.value =
+        0.25;
+
+
+    /*
+       Slight random pitch.
+
+       Keeps repeated sounds from
+       sounding completely identical.
+    */
+
+    source.playbackRate.value =
+        0.95 +
+        Math.random() * 0.10;
+
+
+    source.connect(
+        gain
+    );
+
+
+    gain.connect(
+        audioContext.destination
+    );
+
+
+    source.start(0);
+
+}
+
+
+/* ==================================================
+   PROJECT DATA
 ================================================== */
 
 const savedProject =
@@ -584,7 +756,7 @@ if (!savedProject) {
     `;
 
     throw new Error(
-        "No dialogue project"
+        "No dialogue project found"
     );
 
 }
@@ -637,23 +809,30 @@ const sequence =
 let currentIndex =
     0;
 
+
 let currentCharacter =
     "susie";
+
 
 let currentFullText =
     "";
 
+
 let textPosition =
     0;
+
 
 let typing =
     false;
 
+
 let typingTimer =
     null;
 
+
 let eventRunning =
     false;
+
 
 let gameStarted =
     false;
@@ -709,7 +888,8 @@ const eventText =
    START GAME
 ================================================== */
 
-function startGame() {
+async function startGame() {
+
 
     if (gameStarted) {
 
@@ -727,14 +907,11 @@ function startGame() {
 
 
     /*
-       Loading the audio here means the
-       browser has already received a
-       user interaction.
+       Audio is initialized directly
+       after user interaction.
     */
 
-    voiceSources.susie.load();
-
-    voiceSources.ralsei.load();
+    await prepareAudio();
 
 
     playCurrent();
@@ -743,10 +920,11 @@ function startGame() {
 
 
 /* ==================================================
-   PLAY CURRENT ENTRY
+   PLAY CURRENT
 ================================================== */
 
 function playCurrent() {
+
 
     if (
         currentIndex >=
@@ -802,12 +980,13 @@ function playCurrent() {
 
 
 /* ==================================================
-   PLAY DIALOGUE
+   DIALOGUE
 ================================================== */
 
 function playDialogue(
     entry
 ) {
+
 
     eventRunning =
         false;
@@ -834,6 +1013,7 @@ function playDialogue(
 
     if (spriteSet) {
 
+
         character.src =
             spriteSet[
                 entry.sprite
@@ -841,6 +1021,7 @@ function playDialogue(
             Object.values(
                 spriteSet
             )[0];
+
 
     }
 
@@ -876,10 +1057,11 @@ function playDialogue(
 
 
 /* ==================================================
-   TYPE CHARACTER
+   TYPE TEXT
 ================================================== */
 
 function typeNextCharacter() {
+
 
     if (
         textPosition >=
@@ -907,15 +1089,15 @@ function typeNextCharacter() {
 
 
     /*
-       Letters and numbers get voice.
+       Only actual letters and numbers
+       trigger voice.
 
-       Spaces and punctuation are silent.
+       This prevents weird noises
+       on punctuation.
     */
 
     if (
-        currentChar !== " " &&
-        currentChar !== "\n" &&
-        !/[.,!?;:'"()\[\]{}]/.test(
+        /[a-zA-Z0-9]/.test(
             currentChar
         )
     ) {
@@ -928,10 +1110,9 @@ function typeNextCharacter() {
 
 
     /*
-       Text speed.
+       Typing speed.
 
-       45ms gives a fast,
-       Deltarune-like feeling.
+       Lower number = faster.
     */
 
     typingTimer =
@@ -948,6 +1129,7 @@ function typeNextCharacter() {
 ================================================== */
 
 function finishTyping() {
+
 
     clearTimeout(
         typingTimer
@@ -978,6 +1160,7 @@ function finishTyping() {
 
 function advance() {
 
+
     if (!gameStarted) {
 
         startGame();
@@ -987,6 +1170,10 @@ function advance() {
     }
 
 
+    /*
+       Don't advance during events.
+    */
+
     if (eventRunning) {
 
         return;
@@ -995,11 +1182,12 @@ function advance() {
 
 
     /*
-       If the text is still typing,
-       finish it instantly.
+       First tap while typing
+       instantly finishes the text.
     */
 
     if (typing) {
+
 
         clearTimeout(
             typingTimer
@@ -1046,6 +1234,7 @@ function advance() {
 function playEvent(
     entry
 ) {
+
 
     eventRunning =
         true;
@@ -1107,18 +1296,20 @@ function playEvent(
 
 
 /* ==================================================
-   SHAKE
+   SHAKE EVENT
 ================================================== */
 
 function shakeEvent(
     duration
 ) {
 
+
     const start =
         Date.now();
 
 
     function animate() {
+
 
         const elapsed =
             Date.now() -
@@ -1129,6 +1320,7 @@ function shakeEvent(
             elapsed >=
             duration
         ) {
+
 
             document.body.style.transform =
                 "";
@@ -1173,18 +1365,20 @@ function shakeEvent(
 
 
 /* ==================================================
-   LAUGH
+   LAUGH EVENT
 ================================================== */
 
 function laughEvent(
     duration
 ) {
 
+
     const start =
         Date.now();
 
 
     function animate() {
+
 
         const elapsed =
             Date.now() -
@@ -1195,6 +1389,7 @@ function laughEvent(
             elapsed >=
             duration
         ) {
+
 
             document.body.style.transform =
                 "";
@@ -1236,6 +1431,7 @@ function laughEvent(
 
 function finishEvent() {
 
+
     document.body.style.transform =
         "";
 
@@ -1262,6 +1458,7 @@ function finishEvent() {
 
 function finish() {
 
+
     clearTimeout(
         typingTimer
     );
@@ -1286,12 +1483,13 @@ function finish() {
 
 
 /* ==================================================
-   KEYBOARD
+   ENTER KEY
 ================================================== */
 
 document.addEventListener(
     "keydown",
     function(event) {
+
 
         if (
             event.key !==
@@ -1313,12 +1511,13 @@ document.addEventListener(
 
 
 /* ==================================================
-   MOBILE / TOUCH
+   TOUCH
 ================================================== */
 
 document.addEventListener(
     "pointerdown",
     function(event) {
+
 
         if (
             event.target.closest(
@@ -1340,7 +1539,7 @@ document.addEventListener(
 
 
 /* ==================================================
-   START SCREEN CLICK
+   START SCREEN
 ================================================== */
 
 startScreen.addEventListener(
@@ -1359,6 +1558,7 @@ startScreen.addEventListener(
 
 dialogue.style.display =
     "none";
+
 
 eventScreen.style.display =
     "none";
