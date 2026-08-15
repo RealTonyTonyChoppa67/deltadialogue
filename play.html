@@ -548,9 +548,7 @@ function playDialogue(entry) {
 
 
     character.src =
-        sprites[
-            entry.sprite
-        ] || sprites.neutral;
+    characters[entry.character][entry.sprite];
 
 
     currentFullText =
