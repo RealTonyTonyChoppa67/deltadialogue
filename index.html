@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Deltarune Dialogue Generator</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.generator {
+    width: 100%;
+    max-width: 1100px;
+    background: #1b1b1b;
+    border: 2px solid #444;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 0 30px rgba(0,0,0,.55);
+}
+
+.title {
+    text-align: center;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.top-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.top-buttons button,
+.generate-button,
+.export-button,
+.import-button {
+    border: 0;
+    border-radius: 8px;
+    padding: 12px 18px;
+    color: white;
+    background: #333;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.top-buttons button:hover,
+.export-button:hover,
+.import-button:hover {
+    background: #444;
+}
+
+.new-dialogue {
+    background: #333;
+}
+
+.event-button {
+    background: #553b72 !important;
+}
+
+.editor {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 25px;
+}
+
+.controls {
+    background: #252525;
+    border-radius: 12px;
+    padding: 18px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 7px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+select,
+textarea {
+    width: 100%;
+    background: #111;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 15px;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+
+.sprite-preview {
+    margin-top: 20px;
+    height: 220px;
+    background: #111;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.sprite-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+/* PREVIEW */
+
+.preview-area {
+    background: #080808;
+    border-radius: 12px;
+    padding: 18px;
+    min-width: 0;
+}
+
+.preview-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.dialogue-preview {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    overflow: hidden;
+    background: black;
+    border-radius: 4px;
+}
+
+.dialogue-background {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Smaller Susie */
+
+.character-preview {
+    position: absolute;
+    left: 5%;
+    bottom: 8%;
+    width: 20%;
+    height: 72%;
+    object-fit: contain;
+    object-position: bottom center;
+    image-rendering: pixelated;
+}
+
+.dialogue-text {
+    position: absolute;
+    left: 29%;
+    right: 6%;
+    top: 25%;
+    bottom: 18%;
+
+    color: white;
+
+    font-family:
+        "8-bit Operator JVE",
+        "Courier New",
+        monospace;
+
+    font-size: clamp(12px, 2.1vw, 24px);
+    line-height: 1.35;
+
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    overflow: hidden;
+}
+
+/* SEQUENCE */
+
+.sequence {
+    margin-top: 20px;
+    background: #202020;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.sequence-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.sequence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sequence-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #111;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.sequence-item.active {
+    border-color: white;
+}
+
+.sequence-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.sequence-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.sequence-type {
+    font-size: 12px;
+    color: #aaa;
+}
+
+.sequence-preview {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sequence-delete {
+    border: 0;
+    background: #5a2222;
+    color: white;
+    border-radius: 6px;
+    padding: 7px 10px;
+    cursor: pointer;
+}
+
+/* EVENTS */
+
+.event-settings {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background: #181818;
+    border-radius: 8px;
+}
+
+.event-settings.show {
+    display: block;
+}
+
+.event-settings textarea {
+    min-height: 70px;
+}
+
+.generate-button {
+    width: 100%;
+    margin-top: 18px;
+    background: white;
+    color: black;
+    font-size: 17px;
+}
+
+.generate-button:hover {
+    background: #ddd;
+}
+
+.file-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.file-buttons button {
+    flex: 1;
+}
+
+.info {
+    margin-top: 12px;
+    color: #777;
+    font-size: 12px;
+    text-align: center;
+}
+
+#fileInput {
+    display: none;
+}
+
+@media (max-width: 750px) {
+
+    body {
+        padding: 10px;
+        align-items: flex-start;
+    }
+
+    .generator {
+        padding: 15px;
+    }
+
+    .editor {
+        grid-template-columns: 1fr;
+    }
+
+    .top-buttons {
+        flex-wrap: wrap;
+    }
+
+    .top-buttons button {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .dialogue-text {
+        font-size: clamp(10px, 3vw, 18px);
+    }
+
+    .character-preview {
+        width: 21%;
+        height: 72%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="generator">
+
+    <div class="title">
+        DELTARUNE DIALOGUE GENERATOR
+    </div>
+
+    <!-- TOP BUTTONS -->
+
+    <div class="top-buttons">
+
+        <button
+            class="new-dialogue"
+            onclick="addDialogue()"
+        >
+            + New Dialogue
+        </button>
+
+        <button
+            class="event-button"
+            onclick="addEvent()"
+        >
+            🎬 Event
+        </button>
+
+    </div>
+
+
+    <div class="editor">
+
+        <!-- CONTROLS -->
+
+        <div class="controls">
+
+            <div class="section-title">
+                Current Entry
+            </div>
+
+            <div id="dialogueControls">
+
+                <label>
+                    Character
+                </label>
+
+                <select id="character">
+
+                    <option value="susie">
+                        Susie
+                    </option>
+
+                </select>
+
+
+                <label>
+                    Sprite
+                </label>
+
+                <select id="sprite">
+
+                    <option value="neutral">
+                        Neutral
+                    </option>
+
+                    <option value="mad">
+                        Mad
+                    </option>
+
+                </select>
+
+
+                <label>
+                    What do they say?
+                </label>
+
+                <textarea
+                    id="dialogue"
+                    placeholder="Type dialogue here..."
+                ></textarea>
+
+
+                <div class="section-title" style="margin-top:20px;">
+                    Sprite Preview
+                </div>
+
+                <div class="sprite-preview">
+
+                    <img
+                        id="spriteImage"
+                        src="https://i.ibb.co/G4nYggzv/IMG-0004.jpg"
+                        alt="Susie"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- EVENT SETTINGS -->
+
+            <div
+                id="eventSettings"
+                class="event-settings"
+            >
+
+                <div class="section-title">
+                    Event Settings
+                </div>
+
+                <label>
+                    Event Type
+                </label>
+
+                <select id="eventType">
+
+                    <option value="laugh">
+                        Susie Laughs
+                    </option>
+
+                    <option value="shake">
+                        Screen Shake
+                    </option>
+
+                    <option value="pause">
+                        Pause
+                    </option>
+
+                </select>
+
+
+                <label>
+                    Event Duration (milliseconds)
+                </label>
+
+                <input
+                    id="eventDuration"
+                    type="number"
+                    value="1200"
+                    min="100"
+                    step="100"
+                    style="
+                        width:100%;
+                        background:#111;
+                        color:white;
+                        border:1px solid #555;
+                        border-radius:8px;
+                        padding:11px;
+                    "
+                >
+
+
+                <label>
+                    Event Text
+                </label>
+
+                <textarea
+                    id="eventText"
+                    placeholder="Optional event text..."
+                ></textarea>
+
+            </div>
+
+        </div>
+
+
+        <!-- PREVIEW -->
+
+        <div class="preview-area">
+
+            <div class="preview-title">
+                Live Preview
+            </div>
+
+            <div class="dialogue-preview">
+
+                <img
+                    class="dialogue-background"
+                    src="https://i.ibb.co/21Z5G7Yn/Untitled7-20260815081350.png"
+                    alt="Dialogue box"
+                >
+
+                <img
+                    class="character-preview"
+                    id="characterPreview"
+                    src="https://i.ibb.co/G4nYggzv/IMG-0004.jpg"
+                    alt="Susie"
+                >
+
+                <div
+                    class="dialogue-text"
+                    id="dialoguePreview"
+                >
+                    Type something on the left...
+                </div>
+
+            </div>
+
+
+            <!-- SEQUENCE -->
+
+            <div class="sequence">
+
+                <div class="sequence-title">
+                    Dialogue Sequence
+                </div>
+
+                <div
+                    id="sequenceList"
+                    class="sequence-list"
+                ></div>
+
+            </div>
+
+
+            <!-- GENERATE -->
+
+            <button
+                class="generate-button"
+                onclick="generateDialogue()"
+            >
+                ▶ GENERATE DIALOGUE
+            </button>
+
+
+            <!-- EXPORT / IMPORT -->
+
+            <div class="file-buttons">
+
+                <button
+                    class="export-button"
+                    onclick="exportProject()"
+                >
+                    💾 Export
+                </button>
+
+                <button
+                    class="import-button"
+                    onclick="document.getElementById('fileInput').click()"
+                >
+                    📂 Import
+                </button>
+
+            </div>
+
+            <input
+                type="file"
+                id="fileInput"
+                accept=".json"
+                onchange="importProject(event)"
+            >
+
+            <div class="info">
+                Export saves your entire dialogue sequence and events.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   SPRITES
+========================================== */
+
+const sprites = {
+
+    neutral:
+        "https://i.ibb.co/G4nYggzv/IMG-0004.jpg",
+
+    mad:
+        "https://i.ibb.co/gFHhswgR/IMG-0005.jpg"
+
+};
+
+
+/* ==========================================
+   PROJECT DATA
+========================================== */
+
+let sequence = [];
+
+let currentIndex = -1;
+
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
+const spriteSelect =
+    document.getElementById("sprite");
+
+const spriteImage =
+    document.getElementById("spriteImage");
+
+const characterPreview =
+    document.getElementById("characterPreview");
+
+const dialogueInput =
+    document.getElementById("dialogue");
+
+const dialoguePreview =
+    document.getElementById("dialoguePreview");
+
+const eventSettings =
+    document.getElementById("eventSettings");
+
+
+/* ==========================================
+   UPDATE SPRITE
+========================================== */
+
+spriteSelect.addEventListener(
+    "change",
+    function() {
+
+        const selected =
+            sprites[this.value];
+
+        spriteImage.src = selected;
+
+        characterPreview.src = selected;
+
+        saveCurrentEntry();
+
+    }
+);
+
+
+/* ==========================================
+   UPDATE TEXT
+========================================== */
+
+dialogueInput.addEventListener(
+    "input",
+    function() {
+
+        dialoguePreview.textContent =
+            this.value ||
+            "Type something on the left...";
+
+        saveCurrentEntry();
+
+    }
+);
+
+
+/* ==========================================
+   ADD DIALOGUE
+========================================== */
+
+function addDialogue() {
+
+    saveCurrentEntry();
+
+    sequence.push({
+
+        type: "dialogue",
+
+        character: "susie",
+
+        sprite: "neutral",
+
+        text: ""
+
+    });
+
+    currentIndex =
+        sequence.length - 1;
+
+    loadEntry(currentIndex);
+
+    renderSequence();
+
+}
+
+
+/* ==========================================
+   ADD EVENT
+========================================== */
+
+function addEvent() {
+
+    saveCurrentEntry();
+
+    sequence.push({
+
+        type: "event",
+
+        eventType: "laugh",
+
+        duration: 1200,
+
+        text: ""
+
+    });
+
+    currentIndex =
+        sequence.length - 1;
+
+    loadEntry(currentIndex);
+
+    renderSequence();
+
+}
+
+
+/* ==========================================
+   SAVE CURRENT ENTRY
+========================================== */
+
+function saveCurrentEntry() {
+
+    if (
+        currentIndex < 0 ||
+        !sequence[currentIndex]
+    ) {
+        return;
+    }
+
+
+    const entry =
+        sequence[currentIndex];
+
+
+    if (entry.type === "dialogue") {
+
+        entry.character =
+            document.getElementById("character").value;
+
+        entry.sprite =
+            spriteSelect.value;
+
+        entry.text =
+            dialogueInput.value;
+
+    }
+
+    else if (entry.type === "event") {
+
+        entry.eventType =
+            document.getElementById("eventType").value;
+
+        entry.duration =
+            Number(
+                document.getElementById("eventDuration").value
+            );
+
+        entry.text =
+            document.getElementById("eventText").value;
+
+    }
+
+}
+
+
+/* ==========================================
+   LOAD ENTRY
+========================================== */
+
+function loadEntry(index) {
+
+    if (!sequence[index]) {
+        return;
+    }
+
+    currentIndex = index;
+
+    const entry =
+        sequence[index];
+
+
+    if (entry.type === "dialogue") {
+
+        document.getElementById(
+            "dialogueControls"
+        ).style.display = "block";
+
+        eventSettings.classList.remove("show");
+
+
+        document.getElementById(
+            "character"
+        ).value = entry.character;
+
+
+        spriteSelect.value =
+            entry.sprite;
+
+
+        dialogueInput.value =
+            entry.text;
+
+
+        const sprite =
+            sprites[entry.sprite];
+
+
+        spriteImage.src =
+            sprite;
+
+        characterPreview.src =
+            sprite;
+
+
+        dialoguePreview.textContent =
+            entry.text ||
+            "Type something on the left...";
+
+    }
+
+
+    else {
+
+        document.getElementById(
+            "dialogueControls"
+        ).style.display = "none";
+
+        eventSettings.classList.add("show");
+
+
+        document.getElementById(
+            "eventType"
+        ).value =
+            entry.eventType;
+
+
+        document.getElementById(
+            "eventDuration"
+        ).value =
+            entry.duration;
+
+
+        document.getElementById(
+            "eventText"
+        ).value =
+            entry.text || "";
+
+    }
+
+
+    renderSequence();
+
+}
+
+
+/* ==========================================
+   RENDER SEQUENCE
+========================================== */
+
+function renderSequence() {
+
+    const list =
+        document.getElementById("sequenceList");
+
+    list.innerHTML = "";
+
+
+    sequence.forEach(
+        (entry, index) => {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "sequence-item";
+
+
+            if (index === currentIndex) {
+                item.classList.add("active");
+            }
+
+
+            const number =
+                document.createElement("div");
+
+            number.className =
+                "sequence-number";
+
+            number.textContent =
+                index + 1;
+
+
+            const info =
+                document.createElement("div");
+
+            info.className =
+                "sequence-info";
+
+
+            const type =
+                document.createElement("div");
+
+            type.className =
+                "sequence-type";
+
+
+            const preview =
+                document.createElement("div");
+
+            preview.className =
+                "sequence-preview";
+
+
+            if (entry.type === "dialogue") {
+
+                type.textContent =
+                    "DIALOGUE • SUSIE";
+
+                preview.textContent =
+                    entry.text ||
+                    "(empty dialogue)";
+
+            }
+
+            else {
+
+                type.textContent =
+                    "EVENT • " +
+                    eventName(entry.eventType);
+
+                preview.textContent =
+                    entry.text ||
+                    "(" +
+                    eventName(entry.eventType) +
+                    ")";
+
+            }
+
+
+            info.appendChild(type);
+
+            info.appendChild(preview);
+
+
+            const deleteButton =
+                document.createElement("button");
+
+            deleteButton.className =
+                "sequence-delete";
+
+            deleteButton.textContent =
+                "Delete";
+
+
+            deleteButton.onclick =
+                function(e) {
+
+                    e.stopPropagation();
+
+                    sequence.splice(
+                        index,
+                        1
+                    );
+
+
+                    if (
+                        currentIndex >=
+                        sequence.length
+                    ) {
+
+                        currentIndex =
+                            sequence.length - 1;
+
+                    }
+
+
+                    if (currentIndex >= 0) {
+
+                        loadEntry(
+                            currentIndex
+                        );
+
+                    }
+
+                    else {
+
+                        dialogueInput.value = "";
+
+                        dialoguePreview.textContent =
+                            "Type something on the left...";
+
+                    }
+
+
+                    renderSequence();
+
+                };
+
+
+            item.onclick =
+                function() {
+
+                    saveCurrentEntry();
+
+                    loadEntry(index);
+
+                };
+
+
+            item.appendChild(number);
+
+            item.appendChild(info);
+
+            item.appendChild(deleteButton);
+
+            list.appendChild(item);
+
+        }
+    );
+
+}
+
+
+/* ==========================================
+   EVENT NAMES
+========================================== */
+
+function eventName(type) {
+
+    const names = {
+
+        laugh:
+            "Susie Laughs",
+
+        shake:
+            "Screen Shake",
+
+        pause:
+            "Pause"
+
+    };
+
+    return names[type] || type;
+
+}
+
+
+/* ==========================================
+   EVENT INPUTS
+========================================== */
+
+document.getElementById(
+    "eventType"
+).addEventListener(
+    "change",
+    saveCurrentEntry
+);
+
+
+document.getElementById(
+    "eventDuration"
+).addEventListener(
+    "input",
+    saveCurrentEntry
+);
+
+
+document.getElementById(
+    "eventText"
+).addEventListener(
+    "input",
+    saveCurrentEntry
+);
+
+
+/* ==========================================
+   EXPORT
+========================================== */
+
+function exportProject() {
+
+    saveCurrentEntry();
+
+    const data = {
+
+        version: 1,
+
+        project: "Deltarune Dialogue Generator",
+
+        sequence: sequence
+
+    };
+
+
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    data,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:
+                    "application/json"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+    link.download =
+        "dialogue-project.json";
+
+    link.click();
+
+
+    URL.revokeObjectURL(url);
+
+}
+
+
+/* ==========================================
+   IMPORT
+========================================== */
+
+function importProject(event) {
+
+    const file =
+        event.target.files[0];
+
+    if (!file) return;
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        function(e) {
+
+            try {
+
+                const data =
+                    JSON.parse(
+                        e.target.result
+                    );
+
+
+                if (
+                    !data.sequence ||
+                    !Array.isArray(
+                        data.sequence
+                    )
+                ) {
+
+                    throw new Error(
+                        "Invalid project"
+                    );
+
+                }
+
+
+                sequence =
+                    data.sequence;
+
+
+                if (sequence.length > 0) {
+
+                    currentIndex = 0;
+
+                    loadEntry(0);
+
+                }
+
+
+                renderSequence();
+
+
+            }
+
+            catch {
+
+                alert(
+                    "That file isn't a valid dialogue project."
+                );
+
+            }
+
+        };
+
+
+    reader.readAsText(file);
+
+}
+
+
+/* ==========================================
+   GENERATE
+========================================== */
+
+function generateDialogue() {
+
+    saveCurrentEntry();
+
+
+    if (sequence.length === 0) {
+
+        alert(
+            "Add at least one dialogue first."
+        );
+
+        return;
+
+    }
+
+
+    localStorage.setItem(
+        "deltaruneDialogueProject",
+        JSON.stringify({
+            sequence: sequence
+        })
+    );
+
+
+    window.location.href =
+        "play.html";
+
+}
+
+
+/* ==========================================
+   START
+========================================== */
+
+addDialogue();
+
+</script>
+
+</body>
+</html>
