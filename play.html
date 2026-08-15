@@ -20,17 +20,12 @@
 
     src: url("8bitoperator_jve.ttf") format("truetype");
 
-    font-weight: normal;
-    font-style: normal;
-
 }
-
 
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
-
 
 html,
 body {
@@ -46,12 +41,7 @@ body {
 
     color: white;
 
-    font-family:
-        "8-bit Operator JVE",
-        monospace;
-
 }
-
 
 body {
 
@@ -63,12 +53,11 @@ body {
 
     touch-action: manipulation;
 
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
+
 }
-
-
-/* ==========================================
-   GAME
-========================================== */
 
 #game {
 
@@ -76,8 +65,6 @@ body {
 
     width: 100vw;
     height: 100vh;
-
-    max-width: 1600px;
 
     overflow: hidden;
 
@@ -106,7 +93,6 @@ body {
 
 }
 
-
 #dialogueBackground {
 
     display: block;
@@ -116,7 +102,6 @@ body {
     height: auto;
 
 }
-
 
 #character {
 
@@ -137,7 +122,6 @@ body {
     image-rendering: pixelated;
 
 }
-
 
 #dialogueText {
 
@@ -174,11 +158,6 @@ body {
 
 }
 
-
-/* ==========================================
-   TAP INDICATOR
-========================================== */
-
 #continueIndicator {
 
     position: absolute;
@@ -189,13 +168,12 @@ body {
 
     font-size: 20px;
 
-    animation:
-        blink 0.8s infinite;
-
     display: none;
 
-}
+    animation:
+        blink .8s infinite;
 
+}
 
 @keyframes blink {
 
@@ -212,7 +190,7 @@ body {
 
 
 /* ==========================================
-   EVENT OVERLAY
+   EVENTS
 ========================================== */
 
 #eventOverlay {
@@ -233,7 +211,6 @@ body {
 
 }
 
-
 #eventText {
 
     font-family:
@@ -253,67 +230,6 @@ body {
 
 
 /* ==========================================
-   START SCREEN
-========================================== */
-
-#startScreen {
-
-    position: absolute;
-
-    inset: 0;
-
-    z-index: 50;
-
-    background: #000;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    flex-direction: column;
-
-    font-family:
-        "8-bit Operator JVE",
-        monospace;
-
-}
-
-
-#startScreen button {
-
-    margin-top: 20px;
-
-    padding: 14px 25px;
-
-    border: 2px solid white;
-
-    background: black;
-
-    color: white;
-
-    font-family:
-        "8-bit Operator JVE",
-        monospace;
-
-    font-size: 18px;
-
-    cursor: pointer;
-
-}
-
-
-#startScreen button:hover {
-
-    background: white;
-
-    color: black;
-
-}
-
-
-/* ==========================================
    ERROR
 ========================================== */
 
@@ -324,8 +240,6 @@ body {
     inset: 0;
 
     z-index: 100;
-
-    background: #000;
 
     display: none;
 
@@ -339,8 +253,13 @@ body {
 
     text-align: center;
 
-}
+    background: #000;
 
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
+
+}
 
 #errorScreen button {
 
@@ -375,7 +294,6 @@ body {
 
     }
 
-
     #character {
 
         left: 4%;
@@ -385,7 +303,6 @@ body {
         height: 72%;
 
     }
-
 
     #dialogueText {
 
@@ -419,10 +336,6 @@ body {
 <div id="game">
 
 
-    <!-- ==================================
-         DIALOGUE
-    =================================== -->
-
     <div id="dialogueBox">
 
         <img
@@ -446,37 +359,12 @@ body {
     </div>
 
 
-    <!-- ==================================
-         EVENTS
-    =================================== -->
-
     <div id="eventOverlay">
 
         <div id="eventText"></div>
 
     </div>
 
-
-    <!-- ==================================
-         START SCREEN
-    =================================== -->
-
-    <div id="startScreen">
-
-        <div>
-            DIALOGUE
-        </div>
-
-        <button id="startButton">
-            TAP TO START
-        </button>
-
-    </div>
-
-
-    <!-- ==================================
-         ERROR SCREEN
-    =================================== -->
 
     <div id="errorScreen">
 
@@ -505,11 +393,6 @@ body {
 const characters = {
 
     susie: {
-
-        name: "Susie",
-
-        voice:
-            "susie.ogg",
 
         sprites: {
 
@@ -543,11 +426,6 @@ const characters = {
 
 
     ralsei: {
-
-        name: "Ralsei",
-
-        voice:
-            "ralsei.ogg",
 
         sprites: {
 
@@ -602,16 +480,6 @@ const eventText =
         "eventText"
     );
 
-const startScreen =
-    document.getElementById(
-        "startScreen"
-    );
-
-const startButton =
-    document.getElementById(
-        "startButton"
-    );
-
 const errorScreen =
     document.getElementById(
         "errorScreen"
@@ -624,49 +492,20 @@ const errorMessage =
 
 
 /* ==========================================
-   PROJECT
+   PROJECT VARIABLES
 ========================================== */
 
 let sequence = [];
 
 let currentIndex = 0;
 
-let typing = false;
-
 let currentText = "";
 
 let typingPosition = 0;
 
+let typing = false;
+
 let typingTimer = null;
-
-
-/* ==========================================
-   AUDIO
-========================================== */
-
-/*
-    One reusable audio element.
-
-    This is important because repeatedly creating
-    audio objects for every letter can cause lag,
-    especially on mobile.
-*/
-
-const voiceAudio =
-    new Audio();
-
-voiceAudio.preload =
-    "auto";
-
-voiceAudio.loop =
-    true;
-
-voiceAudio.volume =
-    0.25;
-
-
-let currentVoice =
-    null;
 
 
 /* ==========================================
@@ -684,7 +523,7 @@ function loadProject() {
     if (!saved) {
 
         showError(
-            "No dialogue project was found. Generate a dialogue from index.html first."
+            "No dialogue project was found. Go back to the generator and press Generate Dialogue."
         );
 
         return false;
@@ -704,11 +543,12 @@ function loadProject() {
             !data ||
             !Array.isArray(
                 data.sequence
-            )
+            ) ||
+            data.sequence.length === 0
         ) {
 
             throw new Error(
-                "Invalid sequence"
+                "Invalid project"
             );
 
         }
@@ -718,19 +558,6 @@ function loadProject() {
             data.sequence;
 
 
-        if (
-            sequence.length === 0
-        ) {
-
-            showError(
-                "Your project doesn't contain any dialogue."
-            );
-
-            return false;
-
-        }
-
-
         return true;
 
     }
@@ -738,10 +565,8 @@ function loadProject() {
     catch (error) {
 
         console.error(
-            "Project loading error:",
             error
         );
-
 
         showError(
             "The dialogue project could not be loaded."
@@ -770,32 +595,14 @@ function showError(message) {
 
 
 /* ==========================================
-   START
+   START ENTRY
 ========================================== */
 
-startButton.addEventListener(
-    "click",
-    function() {
+function startEntry() {
 
-        startScreen.style.display =
-            "none";
+    currentIndex = 0;
 
-        startDialogue();
-
-    }
-);
-
-
-/* ==========================================
-   START DIALOGUE
-========================================== */
-
-function startDialogue() {
-
-    currentIndex =
-        0;
-
-    playCurrentEntry();
+    playEntry();
 
 }
 
@@ -804,11 +611,9 @@ function startDialogue() {
    PLAY ENTRY
 ========================================== */
 
-function playCurrentEntry() {
+function playEntry() {
 
-    clearTyping();
-
-    stopVoice();
+    stopTyping();
 
 
     if (
@@ -816,7 +621,7 @@ function playCurrentEntry() {
         sequence.length
     ) {
 
-        finishDialogue();
+        finishGame();
 
         return;
 
@@ -829,7 +634,7 @@ function playCurrentEntry() {
 
     if (!entry) {
 
-        advance();
+        nextEntry();
 
         return;
 
@@ -875,16 +680,12 @@ function playDialogue(entry) {
 
     if (!character) {
 
-        advance();
+        nextEntry();
 
         return;
 
     }
 
-
-    /*
-       Set sprite
-    */
 
     const sprite =
         character.sprites[
@@ -910,10 +711,6 @@ function playDialogue(entry) {
     }
 
 
-    /*
-       Text
-    */
-
     currentText =
         String(
             entry.text || ""
@@ -928,6 +725,14 @@ function playDialogue(entry) {
         "none";
 
 
+    /*
+       IMPORTANT:
+       Typing begins immediately.
+       No audio.
+       No start screen.
+       No delayed initialization.
+    */
+
     typing =
         true;
 
@@ -935,29 +740,16 @@ function playDialogue(entry) {
         0;
 
 
-    /*
-       Start voice before typing.
-
-       The first dialogue therefore gets
-       the same audio treatment as every
-       dialogue after it.
-    */
-
-    startVoice(
-        character.voice
-    );
-
-
-    typeNextCharacter();
+    typeCharacter();
 
 }
 
 
 /* ==========================================
-   TYPE TEXT
+   TYPE CHARACTER
 ========================================== */
 
-function typeNextCharacter() {
+function typeCharacter() {
 
     if (!typing) {
         return;
@@ -986,39 +778,14 @@ function typeNextCharacter() {
 
 
     /*
-       Skip audio on spaces and line breaks.
-       It sounds much closer to game dialogue.
-    */
-
-    const character =
-        currentText[
-            typingPosition - 1
-        ];
-
-
-    if (
-        character !== " " &&
-        character !== "\n" &&
-        character !== "\r"
-    ) {
-
-        restartVoicePulse();
-
-    }
-
-
-    /*
-       Small delay between letters.
-
-       Using setTimeout rather than a giant
-       pile of audio objects keeps mobile
-       browsers happier.
+       30ms per character gives a
+       Deltarune-style quick typing feel.
     */
 
     typingTimer =
         setTimeout(
-            typeNextCharacter,
-            32
+            typeCharacter,
+            30
         );
 
 }
@@ -1030,13 +797,7 @@ function typeNextCharacter() {
 
 function finishTyping() {
 
-    typing =
-        false;
-
-
-    clearTimeout(
-        typingTimer
-    );
+    stopTyping();
 
 
     dialogueText.textContent =
@@ -1050,18 +811,24 @@ function finishTyping() {
 
 
 /* ==========================================
-   CLEAR TYPING
+   STOP TYPING
 ========================================== */
 
-function clearTyping() {
+function stopTyping() {
 
     typing =
         false;
 
 
-    clearTimeout(
-        typingTimer
-    );
+    if (
+        typingTimer !== null
+    ) {
+
+        clearTimeout(
+            typingTimer
+        );
+
+    }
 
 
     typingTimer =
@@ -1071,170 +838,29 @@ function clearTyping() {
 
 
 /* ==========================================
-   SKIP TYPING
+   ADVANCE
 ========================================== */
 
-function skipTyping() {
-
-    if (!typing) {
-        return false;
-    }
-
-
-    clearTyping();
-
-
-    dialogueText.textContent =
-        currentText;
-
-
-    continueIndicator.style.display =
-        "block";
-
-
-    return true;
-
-}
-
-
-/* ==========================================
-   AUDIO
-========================================== */
-
-function startVoice(src) {
-
-    if (!src) {
-        return;
-    }
-
-
-    if (
-        currentVoice ===
-        src
-    ) {
-
-        return;
-
-    }
-
-
-    currentVoice =
-        src;
-
-
-    voiceAudio.pause();
-
-    voiceAudio.currentTime =
-        0;
-
-    voiceAudio.src =
-        src;
-
-    voiceAudio.load();
-
+function advance() {
 
     /*
-       play() may be blocked until the
-       user interacts with the page.
-
-       The Start button provides that
-       interaction on mobile.
+       If text is still typing,
+       the first tap/Enter instantly
+       finishes it.
     */
 
-    const promise =
-        voiceAudio.play();
+    if (typing) {
 
+        finishTyping();
 
-    if (
-        promise &&
-        promise.catch
-    ) {
-
-        promise.catch(
-            error => {
-
-                console.log(
-                    "Voice playback waiting for interaction:",
-                    error
-                );
-
-            }
-        );
-
-    }
-
-}
-
-
-/*
-    Instead of creating a new audio object
-    for every character, briefly restart
-    the SAME audio element.
-
-    This prevents hundreds of simultaneous
-    audio objects from building up.
-*/
-
-function restartVoicePulse() {
-
-    if (!voiceAudio.src) {
         return;
-    }
-
-
-    try {
-
-        voiceAudio.currentTime =
-            0;
-
-
-        if (
-            voiceAudio.paused
-        ) {
-
-            const promise =
-                voiceAudio.play();
-
-
-            if (
-                promise &&
-                promise.catch
-            ) {
-
-                promise.catch(
-                    () => {}
-                );
-
-            }
-
-        }
 
     }
 
-    catch {
 
-        /*
-           Ignore browser audio timing errors.
-        */
+    currentIndex++;
 
-    }
-
-}
-
-
-/* ==========================================
-   STOP AUDIO
-========================================== */
-
-function stopVoice() {
-
-    voiceAudio.pause();
-
-    voiceAudio.currentTime =
-        0;
-
-    currentVoice =
-        null;
+    playEntry();
 
 }
 
@@ -1245,9 +871,7 @@ function stopVoice() {
 
 function playEvent(entry) {
 
-    clearTyping();
-
-    stopVoice();
+    stopTyping();
 
 
     dialogueText.textContent =
@@ -1255,6 +879,10 @@ function playEvent(entry) {
 
 
     characterImage.style.display =
+        "none";
+
+
+    continueIndicator.style.display =
         "none";
 
 
@@ -1272,10 +900,6 @@ function playEvent(entry) {
         ) || 1000;
 
 
-    /*
-       Screen shake
-    */
-
     if (
         entry.eventType ===
         "shake"
@@ -1288,14 +912,6 @@ function playEvent(entry) {
     }
 
 
-    /*
-       Laugh event
-
-       For now this waits for the event
-       duration. You can later give events
-       their own audio/animation.
-    */
-
     setTimeout(
         function() {
 
@@ -1303,7 +919,7 @@ function playEvent(entry) {
                 "none";
 
 
-            advance();
+            nextEntry();
 
         },
         duration
@@ -1313,7 +929,7 @@ function playEvent(entry) {
 
 
 /* ==========================================
-   SCREEN SHAKE
+   SHAKE EVENT
 ========================================== */
 
 function shakeScreen(duration) {
@@ -1347,18 +963,14 @@ function shakeScreen(duration) {
         }
 
 
-        const strength =
-            7;
-
-
         const x =
-            (Math.random() - 0.5)
-            * strength;
+            (Math.random() - .5)
+            * 8;
 
 
         const y =
-            (Math.random() - 0.5)
-            * strength;
+            (Math.random() - .5)
+            * 8;
 
 
         game.style.transform =
@@ -1380,14 +992,14 @@ function shakeScreen(duration) {
 
 
 /* ==========================================
-   ADVANCE
+   NEXT
 ========================================== */
 
-function advance() {
+function nextEntry() {
 
     currentIndex++;
 
-    playCurrentEntry();
+    playEntry();
 
 }
 
@@ -1396,11 +1008,9 @@ function advance() {
    FINISH
 ========================================== */
 
-function finishDialogue() {
+function finishGame() {
 
-    stopVoice();
-
-    clearTyping();
+    stopTyping();
 
 
     dialogueText.textContent =
@@ -1418,46 +1028,12 @@ function finishDialogue() {
     eventOverlay.style.display =
         "none";
 
-
-    /*
-       Leave the screen black when the
-       dialogue is finished.
-    */
-
 }
 
 
 /* ==========================================
-   INPUT
+   KEYBOARD
 ========================================== */
-
-function handleAdvance() {
-
-    /*
-       First tap/Enter finishes typing.
-       It does NOT immediately skip to the
-       next dialogue.
-    */
-
-    if (
-        skipTyping()
-    ) {
-
-        return;
-
-    }
-
-
-    /*
-       Text is already finished, so advance.
-    */
-
-    advance();
-
-}
-
-
-/* Keyboard */
 
 document.addEventListener(
     "keydown",
@@ -1470,7 +1046,7 @@ document.addEventListener(
 
             event.preventDefault();
 
-            handleAdvance();
+            advance();
 
         }
 
@@ -1478,30 +1054,17 @@ document.addEventListener(
 );
 
 
-/* Mobile tap */
+/* ==========================================
+   MOBILE TAP
+========================================== */
 
 document.getElementById(
     "game"
 ).addEventListener(
     "click",
-    function(event) {
+    function() {
 
-        /*
-           Don't treat the Start button as
-           a dialogue tap.
-        */
-
-        if (
-            startScreen.style.display !==
-            "none"
-        ) {
-
-            return;
-
-        }
-
-
-        handleAdvance();
+        advance();
 
     }
 );
@@ -1516,10 +1079,11 @@ if (
 ) {
 
     /*
-       Project loaded successfully.
-       Wait for the user to tap Start so
-       mobile browsers allow audio playback.
+       Start immediately.
+       This fixes the first-dialogue issue.
     */
+
+    startEntry();
 
 }
 
