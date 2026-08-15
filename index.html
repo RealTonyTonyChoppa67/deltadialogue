@@ -13,6 +13,29 @@
 
 <style>
 
+/* ==========================================
+   8-BIT OPERATOR JVE FONT
+========================================== */
+
+@font-face {
+
+    font-family: "8-bit Operator JVE";
+
+    src:
+        url("8bitoperator_jve.ttf")
+        format("truetype");
+
+    font-weight: normal;
+
+    font-style: normal;
+
+}
+
+
+/* ==========================================
+   GENERAL
+========================================== */
+
 * {
     box-sizing: border-box;
 }
@@ -21,13 +44,18 @@ html,
 body {
 
     margin: 0;
+
     width: 100%;
+
     min-height: 100%;
 
     background: #111;
+
     color: white;
 
-    font-family: Arial, sans-serif;
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
 
 }
 
@@ -40,6 +68,7 @@ body {
     display: flex;
 
     justify-content: center;
+
     align-items: center;
 
 }
@@ -47,6 +76,7 @@ body {
 .generator {
 
     width: 100%;
+
     max-width: 1100px;
 
     background: #1b1b1b;
@@ -68,7 +98,7 @@ body {
 
     font-size: 28px;
 
-    font-weight: bold;
+    font-weight: normal;
 
     margin-bottom: 20px;
 
@@ -101,7 +131,9 @@ body {
 
     background: #333;
 
-    font-weight: bold;
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
 
     cursor: pointer;
 
@@ -153,8 +185,6 @@ body {
 
     font-size: 18px;
 
-    font-weight: bold;
-
     margin-bottom: 10px;
 
 }
@@ -187,6 +217,10 @@ textarea {
     border-radius: 8px;
 
     padding: 11px;
+
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
 
     font-size: 15px;
 
@@ -266,8 +300,6 @@ textarea {
 .preview-title {
 
     font-size: 18px;
-
-    font-weight: bold;
 
     margin-bottom: 15px;
 
@@ -351,7 +383,6 @@ textarea {
 
     font-family:
         "8-bit Operator JVE",
-        "Courier New",
         monospace;
 
     font-size:
@@ -389,8 +420,6 @@ textarea {
 }
 
 .sequence-title {
-
-    font-weight: bold;
 
     margin-bottom: 10px;
 
@@ -490,6 +519,10 @@ textarea {
 
     padding: 7px 10px;
 
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
+
     cursor: pointer;
 
 }
@@ -540,9 +573,11 @@ textarea {
 
     color: black;
 
-    font-size: 17px;
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
 
-    font-weight: bold;
+    font-size: 17px;
 
     cursor: pointer;
 
@@ -576,7 +611,9 @@ textarea {
 
     color: white;
 
-    font-weight: bold;
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
 
     cursor: pointer;
 
@@ -678,6 +715,7 @@ textarea {
 
 </head>
 
+
 <body>
 
 
@@ -709,9 +747,7 @@ textarea {
     <div class="editor">
 
 
-        <!-- =====================
-             CONTROLS
-        ====================== -->
+        <!-- CONTROLS -->
 
         <div class="controls">
 
@@ -721,9 +757,6 @@ textarea {
 
 
             <div id="dialogueControls">
-
-
-                <!-- CHARACTER -->
 
                 <label>
                     Character
@@ -742,8 +775,6 @@ textarea {
                 </select>
 
 
-                <!-- SPRITE -->
-
                 <label>
                     Sprite
                 </label>
@@ -751,8 +782,6 @@ textarea {
                 <select id="sprite">
                 </select>
 
-
-                <!-- TEXT -->
 
                 <label>
                     What do they say?
@@ -763,8 +792,6 @@ textarea {
                     placeholder="Type dialogue here..."
                 ></textarea>
 
-
-                <!-- SPRITE PREVIEW -->
 
                 <div
                     class="section-title"
@@ -788,9 +815,7 @@ textarea {
             </div>
 
 
-            <!-- =====================
-                 EVENT SETTINGS
-            ====================== -->
+            <!-- EVENT SETTINGS -->
 
             <div
                 id="eventSettings"
@@ -840,6 +865,7 @@ textarea {
                         border:1px solid #555;
                         border-radius:8px;
                         padding:11px;
+                        font-family:'8-bit Operator JVE', monospace;
                     "
                 >
 
@@ -858,9 +884,7 @@ textarea {
         </div>
 
 
-        <!-- =====================
-             PREVIEW
-        ====================== -->
+        <!-- PREVIEW -->
 
         <div class="preview-area">
 
@@ -896,9 +920,7 @@ textarea {
             </div>
 
 
-            <!-- =====================
-                 SEQUENCE
-            ====================== -->
+            <!-- SEQUENCE -->
 
             <div class="sequence">
 
@@ -961,6 +983,7 @@ textarea {
 
 
 <script>
+
 
 /* ==========================================
    CHARACTER DATA
@@ -1084,48 +1107,32 @@ let currentIndex = -1;
 ========================================== */
 
 const characterSelect =
-    document.getElementById(
-        "character"
-    );
+    document.getElementById("character");
 
 const spriteSelect =
-    document.getElementById(
-        "sprite"
-    );
+    document.getElementById("sprite");
 
 const spriteImage =
-    document.getElementById(
-        "spriteImage"
-    );
+    document.getElementById("spriteImage");
 
 const characterPreview =
-    document.getElementById(
-        "characterPreview"
-    );
+    document.getElementById("characterPreview");
 
 const dialogueInput =
-    document.getElementById(
-        "dialogue"
-    );
+    document.getElementById("dialogue");
 
 const dialoguePreview =
-    document.getElementById(
-        "dialoguePreview"
-    );
+    document.getElementById("dialoguePreview");
 
 const dialogueControls =
-    document.getElementById(
-        "dialogueControls"
-    );
+    document.getElementById("dialogueControls");
 
 const eventSettings =
-    document.getElementById(
-        "eventSettings"
-    );
+    document.getElementById("eventSettings");
 
 
 /* ==========================================
-   POPULATE SPRITES
+   SPRITES
 ========================================== */
 
 function updateSpriteOptions(
@@ -1147,9 +1154,7 @@ function updateSpriteOptions(
         ([key, sprite]) => {
 
             const option =
-                document.createElement(
-                    "option"
-                );
+                document.createElement("option");
 
             option.value =
                 key;
@@ -1184,7 +1189,7 @@ function updateSpriteOptions(
 
 
 /* ==========================================
-   UPDATE SPRITE PREVIEW
+   SPRITE PREVIEW
 ========================================== */
 
 function updateSpritePreview() {
@@ -1206,6 +1211,7 @@ function updateSpritePreview() {
 
     spriteImage.src =
         sprite.url;
+
 
     characterPreview.src =
         sprite.url;
@@ -1373,7 +1379,6 @@ function saveCurrentEntry() {
 
     }
 
-
     else {
 
         entry.eventType =
@@ -1453,7 +1458,6 @@ function loadEntry(index) {
             "Type something on the left...";
 
     }
-
 
     else {
 
@@ -1582,9 +1586,12 @@ function renderSequence() {
 
                 type.textContent =
                     "DIALOGUE • " +
-                    characters[
+                    (
+                        characters[
+                            entry.character
+                        ]?.name ||
                         entry.character
-                    ].name;
+                    );
 
 
                 preview.textContent =
@@ -1592,7 +1599,6 @@ function renderSequence() {
                     "(empty dialogue)";
 
             }
-
 
             else {
 
@@ -1614,13 +1620,9 @@ function renderSequence() {
             }
 
 
-            info.appendChild(
-                type
-            );
+            info.appendChild(type);
 
-            info.appendChild(
-                preview
-            );
+            info.appendChild(preview);
 
 
             const deleteButton =
@@ -1694,22 +1696,14 @@ function renderSequence() {
                 };
 
 
-            item.appendChild(
-                number
-            );
+            item.appendChild(number);
 
-            item.appendChild(
-                info
-            );
+            item.appendChild(info);
 
-            item.appendChild(
-                deleteButton
-            );
+            item.appendChild(deleteButton);
 
 
-            list.appendChild(
-                item
-            );
+            list.appendChild(item);
 
         }
     );
@@ -1819,9 +1813,7 @@ function exportProject() {
 
 
     const link =
-        document.createElement(
-            "a"
-        );
+        document.createElement("a");
 
 
     link.href =
@@ -1882,8 +1874,20 @@ function importProject(event) {
                 }
 
 
-                sequence =
-                    data.sequence;
+                /*
+                   Fixed:
+                   sequence is now mutable,
+                   so imported projects
+                   actually work.
+                */
+
+                sequence.length =
+                    0;
+
+
+                sequence.push(
+                    ...data.sequence
+                );
 
 
                 if (
@@ -1894,7 +1898,6 @@ function importProject(event) {
                     loadEntry(0);
 
                 }
-
 
             }
 
