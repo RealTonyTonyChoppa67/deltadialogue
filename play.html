@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -31,13 +32,12 @@ body {
 
     color: white;
 
+    user-select: none;
+    -webkit-user-select: none;
+
     font-family:
         "Courier New",
         monospace;
-
-    user-select: none;
-
-    -webkit-user-select: none;
 
 }
 
@@ -75,7 +75,7 @@ body {
 
 
 /* =========================
-   DIALOGUE BOX
+   DIALOGUE
 ========================= */
 
 .dialogue {
@@ -94,7 +94,8 @@ body {
 }
 
 
-/* Keep original proportions */
+/* Keep original dialogue-box
+   proportions */
 
 .dialogue-background {
 
@@ -172,7 +173,37 @@ body {
 
 
 /* =========================
-   EVENT
+   CONTINUE INDICATOR
+========================= */
+
+#continueIndicator {
+
+    position: absolute;
+
+    right: 3%;
+
+    bottom: 9%;
+
+    font-size: 18px;
+
+    animation:
+        blink 0.8s infinite;
+
+    display: none;
+
+}
+
+@keyframes blink {
+
+    50% {
+        opacity: 0.2;
+    }
+
+}
+
+
+/* =========================
+   EVENTS
 ========================= */
 
 #eventScreen {
@@ -214,36 +245,6 @@ body {
 
 
 /* =========================
-   CLICK INDICATOR
-========================= */
-
-#continueIndicator {
-
-    position: absolute;
-
-    right: 3%;
-
-    bottom: 9%;
-
-    font-size: 18px;
-
-    animation:
-        blink 0.8s infinite;
-
-    display: none;
-
-}
-
-@keyframes blink {
-
-    50% {
-        opacity: 0.2;
-    }
-
-}
-
-
-/* =========================
    MOBILE
 ========================= */
 
@@ -280,13 +281,16 @@ body {
 
 </head>
 
+
 <body>
 
 
 <div id="game">
 
 
-    <!-- DIALOGUE -->
+    <!-- =====================
+         DIALOGUE BOX
+    ====================== -->
 
     <div
         id="dialogue"
@@ -296,6 +300,7 @@ body {
         <img
             class="dialogue-background"
             src="https://i.ibb.co/21Z5G7Yn/Untitled7-20260815081350.png"
+            alt="Dialogue box"
         >
 
 
@@ -303,6 +308,7 @@ body {
             id="character"
             class="character"
             src=""
+            alt="Character"
         >
 
 
@@ -321,7 +327,9 @@ body {
     </div>
 
 
-    <!-- EVENTS -->
+    <!-- =====================
+         EVENTS
+    ====================== -->
 
     <div
         id="eventScreen"
@@ -339,9 +347,10 @@ body {
 
 <script>
 
-/* ==========================================
-   SPRITES
-========================================== */
+
+/* ==================================================
+   CHARACTER SPRITES
+================================================== */
 
 const characters = {
 
@@ -373,6 +382,7 @@ const characters = {
 
     },
 
+
     ralsei: {
 
         happy:
@@ -395,85 +405,92 @@ const characters = {
 };
 
 
-/* ==========================================
-   PROJECT
-========================================== */
+/* ==================================================
+   CHARACTER VOICE AUDIO
+==================================================
 
-const saved =
+   Change these paths if your files have
+   different names or folders.
+================================================== */
+
+const voiceSounds = {
+
+    susie:
+        "sounds/susie.ogg",
+
+    ralsei:
+        "sounds/ralsei.ogg"
+
+};
+
+
+/* ==================================================
+   AUDIO OBJECTS
+================================================== */
+
+const voiceAudio = {
+
+    susie:
+        new Audio(voiceSounds.susie),
+
+    ralsei:
+        new Audio(voiceSounds.ralsei)
+
+};
+
+
+/* ==================================================
+   PROJECT
+================================================== */
+
+const savedProject =
     localStorage.getItem(
         "deltaruneDialogueProject"
     );
 
 
-if (!saved) {
+if (!savedProject) {
 
     document.body.innerHTML = `
+
         <div style="
             color:white;
             font-family:Arial;
             text-align:center;
             padding:40px;
         ">
+
             No dialogue project found.
+
         </div>
+
     `;
 
     throw new Error(
-        "No project"
+        "No dialogue project"
     );
 
 }
 
 
 const project =
-    JSON.parse(saved);
+    JSON.parse(
+        savedProject
+    );
 
 
 const sequence =
     project.sequence || [];
 
 
+/* ==================================================
+   PLAYER STATE
+================================================== */
+
 let currentIndex = 0;
 
-
-/* ==========================================
-   ELEMENTS
-========================================== */
-
-const dialogue =
-    document.getElementById(
-        "dialogue"
-    );
-
-const character =
-    document.getElementById(
-        "character"
-    );
-
-const text =
-    document.getElementById(
-        "text"
-    );
-
-const indicator =
-    document.getElementById(
-        "continueIndicator"
-    );
-
-const eventScreen =
-    document.getElementById(
-        "eventScreen"
-    );
-
-const eventText =
-    document.getElementById(
-        "eventText"
-    );
-
-
-/* ==========================================
-   TYPING
-========================================== */
+let currentCharacter =
+    "susie";
 
 let typing = false;
 
@@ -484,16 +501,108 @@ let currentFullText = "";
 let textPosition = 0;
 
 
-/* ==========================================
-   START
-========================================== */
+/* ==================================================
+   ELEMENTS
+================================================== */
 
-playCurrent();
+const dialogue =
+    document.getElementById(
+        "dialogue"
+    );
 
 
-/* ==========================================
-   PLAY CURRENT
-========================================== */
+const character =
+    document.getElementById(
+        "character"
+    );
+
+
+const text =
+    document.getElementById(
+        "text"
+    );
+
+
+const indicator =
+    document.getElementById(
+        "continueIndicator"
+    );
+
+
+const eventScreen =
+    document.getElementById(
+        "eventScreen"
+    );
+
+
+const eventText =
+    document.getElementById(
+        "eventText"
+    );
+
+
+/* ==================================================
+   AUDIO UNLOCK
+==================================================
+
+   Mobile browsers can block audio until
+   the user interacts with the page.
+
+   We silently initialize the sounds after
+   the first tap/key press.
+================================================== */
+
+let audioUnlocked = false;
+
+
+function unlockAudio() {
+
+    if (audioUnlocked) {
+        return;
+    }
+
+    audioUnlocked = true;
+
+
+    Object.values(
+        voiceAudio
+    ).forEach(
+        audio => {
+
+            audio.volume = 0;
+
+            audio.play()
+                .then(
+                    () => {
+
+                        audio.pause();
+
+                        audio.currentTime =
+                            0;
+
+                        audio.volume =
+                            1;
+
+                    }
+                )
+                .catch(
+                    () => {
+
+                        audio.volume =
+                            1;
+
+                    }
+                );
+
+        }
+    );
+
+}
+
+
+/* ==================================================
+   PLAY CURRENT ENTRY
+================================================== */
 
 function playCurrent() {
 
@@ -518,7 +627,9 @@ function playCurrent() {
         "dialogue"
     ) {
 
-        playDialogue(entry);
+        playDialogue(
+            entry
+        );
 
     }
 
@@ -527,39 +638,66 @@ function playCurrent() {
         "event"
     ) {
 
-        playEvent(entry);
+        playEvent(
+            entry
+        );
 
     }
 
 }
 
 
-/* ==========================================
-   DIALOGUE
-========================================== */
+/* ==================================================
+   PLAY DIALOGUE
+================================================== */
 
 function playDialogue(entry) {
 
     eventScreen.style.display =
         "none";
 
+
     dialogue.style.display =
         "block";
 
 
+    currentCharacter =
+        entry.character ||
+        "susie";
+
+
+    const characterSprites =
+        characters[
+            currentCharacter
+        ];
+
+
     character.src =
-    characters[entry.character][entry.sprite];
+        characterSprites[
+            entry.sprite
+        ] ||
+        characterSprites[
+            Object.keys(
+                characterSprites
+            )[0]
+        ];
 
 
     currentFullText =
         entry.text || "";
 
 
-    textPosition = 0;
+    textPosition =
+        0;
 
-    text.textContent = "";
 
-    typing = true;
+    text.textContent =
+        "";
+
+
+    typing =
+        true;
+
 
     indicator.style.display =
         "none";
@@ -570,9 +708,9 @@ function playDialogue(entry) {
 }
 
 
-/* ==========================================
-   TYPE CHARACTER
-========================================== */
+/* ==================================================
+   TYPE TEXT
+================================================== */
 
 function typeNextCharacter() {
 
@@ -581,30 +719,62 @@ function typeNextCharacter() {
         currentFullText.length
     ) {
 
-        typing = false;
+        typing =
+            false;
+
 
         indicator.style.display =
             "block";
+
 
         return;
 
     }
 
 
-    text.textContent +=
+    const currentChar =
         currentFullText[
             textPosition
         ];
+
+
+    text.textContent +=
+        currentChar;
 
 
     textPosition++;
 
 
     /*
-        Adjust this number to change
-        typing speed.
+       Play voice audio for actual
+       letters/numbers.
 
-        Lower = faster.
+       Spaces and punctuation are
+       silent.
+    */
+
+    if (
+        currentChar !== " " &&
+        currentChar !== "\n" &&
+        !/[.,!?;:'"()\[\]{}]/.test(
+            currentChar
+        )
+    ) {
+
+        playVoice(
+            currentCharacter
+        );
+
+    }
+
+
+    /*
+       Change this number to adjust
+       typing speed.
+
+       35 = fairly fast
+       50 = slower
+       20 = very fast
     */
 
     typingTimer =
@@ -616,11 +786,69 @@ function typeNextCharacter() {
 }
 
 
-/* ==========================================
+/* ==================================================
+   PLAY CHARACTER VOICE
+================================================== */
+
+function playVoice(characterName) {
+
+    const audio =
+        voiceAudio[
+            characterName
+        ];
+
+
+    if (!audio) {
+        return;
+    }
+
+
+    /*
+       Restart the sound every letter.
+    */
+
+    audio.pause();
+
+    audio.currentTime =
+        0;
+
+
+    /*
+       Tiny pitch variation so
+       every letter doesn't sound
+       completely identical.
+    */
+
+    audio.playbackRate =
+        0.95 +
+        Math.random() * 0.10;
+
+
+    audio.volume =
+        1;
+
+
+    audio.play()
+        .catch(
+            () => {}
+        );
+
+}
+
+
+/* ==================================================
    ADVANCE
-========================================== */
+================================================== */
 
 function advance() {
+
+    unlockAudio();
+
+
+    /*
+       If text is still typing,
+       immediately finish it.
+    */
 
     if (typing) {
 
@@ -628,16 +856,22 @@ function advance() {
             typingTimer
         );
 
+
         text.textContent =
             currentFullText;
+
 
         textPosition =
             currentFullText.length;
 
-        typing = false;
+
+        typing =
+            false;
+
 
         indicator.style.display =
             "block";
+
 
         return;
 
@@ -650,19 +884,21 @@ function advance() {
 
     currentIndex++;
 
+
     playCurrent();
 
 }
 
 
-/* ==========================================
+/* ==================================================
    EVENTS
-========================================== */
+================================================== */
 
 function playEvent(entry) {
 
     dialogue.style.display =
         "none";
+
 
     eventScreen.style.display =
         "flex";
@@ -674,35 +910,34 @@ function playEvent(entry) {
 
     const duration =
         Number(
-            entry.duration || 1000
+            entry.duration ||
+            1000
         );
 
-
-    /* LAUGH */
 
     if (
         entry.eventType ===
         "laugh"
     ) {
 
-        playLaugh(duration);
+        playLaugh(
+            duration
+        );
 
     }
 
-
-    /* SHAKE */
 
     else if (
         entry.eventType ===
         "shake"
     ) {
 
-        playShake(duration);
+        playShake(
+            duration
+        );
 
     }
 
-
-    /* PAUSE */
 
     else {
 
@@ -716,23 +951,27 @@ function playEvent(entry) {
 }
 
 
-/* ==========================================
+/* ==================================================
    LAUGH EVENT
-========================================== */
+================================================== */
 
 function playLaugh(duration) {
 
-    let start =
+    const start =
         Date.now();
 
 
-    function laughAnimation() {
+    function animate() {
 
         const elapsed =
-            Date.now() - start;
+            Date.now() -
+            start;
 
 
-        if (elapsed >= duration) {
+        if (
+            elapsed >=
+            duration
+        ) {
 
             document.body.style.transform =
                 "";
@@ -743,11 +982,6 @@ function playLaugh(duration) {
 
         }
 
-
-        /*
-            Small screen movement to
-            make the laugh feel alive.
-        */
 
         const offset =
             Math.sin(
@@ -760,20 +994,20 @@ function playLaugh(duration) {
 
 
         requestAnimationFrame(
-            laughAnimation
+            animate
         );
 
     }
 
 
-    laughAnimation();
+    animate();
 
 }
 
 
-/* ==========================================
+/* ==================================================
    SHAKE EVENT
-========================================== */
+================================================== */
 
 function playShake(duration) {
 
@@ -784,10 +1018,14 @@ function playShake(duration) {
     function shake() {
 
         const elapsed =
-            Date.now() - start;
+            Date.now() -
+            start;
 
 
-        if (elapsed >= duration) {
+        if (
+            elapsed >=
+            duration
+        ) {
 
             document.body.style.transform =
                 "";
@@ -800,10 +1038,13 @@ function playShake(duration) {
 
 
         const x =
-            (Math.random() - 0.5) * 14;
+            (Math.random() - 0.5) *
+            14;
+
 
         const y =
-            (Math.random() - 0.5) * 14;
+            (Math.random() - 0.5) *
+            14;
 
 
         document.body.style.transform =
@@ -822,47 +1063,73 @@ function playShake(duration) {
 }
 
 
-/* ==========================================
+/* ==================================================
    FINISH EVENT
-========================================== */
+================================================== */
 
 function finishEvent() {
 
     document.body.style.transform =
         "";
 
+
     eventScreen.style.display =
         "none";
 
+
     currentIndex++;
+
 
     playCurrent();
 
 }
 
 
-/* ==========================================
+/* ==================================================
    FINISH PROJECT
-========================================== */
+================================================== */
 
 function finish() {
 
     dialogue.style.display =
         "none";
 
+
     eventScreen.style.display =
         "none";
+
+
+    /*
+       Stop any currently playing
+       character sound.
+    */
+
+    Object.values(
+        voiceAudio
+    ).forEach(
+        audio => {
+
+            audio.pause();
+
+            audio.currentTime =
+                0;
+
+        }
+    );
 
 }
 
 
-/* ==========================================
+/* ==================================================
    KEYBOARD
-========================================== */
+================================================== */
 
 document.addEventListener(
     "keydown",
     function(event) {
+
+        unlockAudio();
+
 
         if (
             event.key ===
@@ -879,17 +1146,20 @@ document.addEventListener(
 );
 
 
-/* ==========================================
-   MOBILE TAP
-========================================== */
+/* ==================================================
+   MOBILE / TOUCH
+================================================== */
 
 document.addEventListener(
     "pointerdown",
     function(event) {
 
+        unlockAudio();
+
+
         /*
-            Ignore taps while an event
-            is running.
+           Don't advance while an
+           event is running.
         */
 
         if (
@@ -906,6 +1176,13 @@ document.addEventListener(
 
     }
 );
+
+
+/* ==================================================
+   START
+================================================== */
+
+playCurrent();
 
 </script>
 
