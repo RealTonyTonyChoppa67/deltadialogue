@@ -5,10 +5,8 @@
 
 <meta charset="UTF-8">
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>Dialogue Player</title>
 
@@ -22,11 +20,10 @@ html,
 body {
 
     margin: 0;
-
     width: 100%;
     height: 100%;
 
-    background: black;
+    background: #000;
 
     overflow: hidden;
 
@@ -35,10 +32,6 @@ body {
     user-select: none;
     -webkit-user-select: none;
 
-    font-family:
-        "Courier New",
-        monospace;
-
 }
 
 body {
@@ -46,15 +39,9 @@ body {
     display: flex;
 
     justify-content: center;
-
     align-items: flex-end;
 
 }
-
-
-/* =========================
-   GAME SCREEN
-========================= */
 
 #game {
 
@@ -75,27 +62,20 @@ body {
 
 
 /* =========================
-   DIALOGUE
+   DIALOGUE BOX
 ========================= */
 
 .dialogue {
 
     position: relative;
 
-    width: min(
-        100vw,
-        1100px
-    );
+    width: min(100vw, 1100px);
 
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 
     display: none;
 
 }
-
-
-/* Keep original dialogue-box
-   proportions */
 
 .dialogue-background {
 
@@ -157,11 +137,7 @@ body {
         monospace;
 
     font-size:
-        clamp(
-            14px,
-            2.4vw,
-            28px
-        );
+        clamp(14px, 2.4vw, 28px);
 
     line-height: 1.35;
 
@@ -173,7 +149,7 @@ body {
 
 
 /* =========================
-   CONTINUE INDICATOR
+   CONTINUE
 ========================= */
 
 #continueIndicator {
@@ -182,14 +158,13 @@ body {
 
     right: 3%;
 
-    bottom: 9%;
+    bottom: 8%;
 
     font-size: 18px;
 
-    animation:
-        blink 0.8s infinite;
-
     display: none;
+
+    animation: blink 0.8s infinite;
 
 }
 
@@ -212,18 +187,17 @@ body {
 
     inset: 0;
 
+    background: black;
+
     display: none;
 
     justify-content: center;
 
     align-items: center;
 
-    background: black;
-
-    z-index: 20;
+    z-index: 50;
 
 }
-
 
 .event-text {
 
@@ -233,11 +207,7 @@ body {
         monospace;
 
     font-size:
-        clamp(
-            18px,
-            4vw,
-            40px
-        );
+        clamp(18px, 4vw, 40px);
 
     text-align: center;
 
@@ -261,11 +231,7 @@ body {
     .text {
 
         font-size:
-            clamp(
-                10px,
-                3.2vw,
-                18px
-            );
+            clamp(10px, 3.2vw, 18px);
 
     }
 
@@ -281,16 +247,11 @@ body {
 
 </head>
 
-
 <body>
 
 
 <div id="game">
 
-
-    <!-- =====================
-         DIALOGUE BOX
-    ====================== -->
 
     <div
         id="dialogue"
@@ -300,7 +261,6 @@ body {
         <img
             class="dialogue-background"
             src="https://i.ibb.co/21Z5G7Yn/Untitled7-20260815081350.png"
-            alt="Dialogue box"
         >
 
 
@@ -308,7 +268,6 @@ body {
             id="character"
             class="character"
             src=""
-            alt="Character"
         >
 
 
@@ -326,10 +285,6 @@ body {
 
     </div>
 
-
-    <!-- =====================
-         EVENTS
-    ====================== -->
 
     <div
         id="eventScreen"
@@ -349,7 +304,7 @@ body {
 
 
 /* ==================================================
-   CHARACTER SPRITES
+   SPRITES
 ================================================== */
 
 const characters = {
@@ -406,11 +361,7 @@ const characters = {
 
 
 /* ==================================================
-   CHARACTER VOICE AUDIO
-==================================================
-
-   Change these paths if your files have
-   different names or folders.
+   VOICE FILES
 ================================================== */
 
 const voiceSounds = {
@@ -425,18 +376,36 @@ const voiceSounds = {
 
 
 /* ==================================================
-   AUDIO OBJECTS
+   AUDIO
 ================================================== */
 
 const voiceAudio = {
 
     susie:
-        new Audio(voiceSounds.susie),
+        new Audio(
+            voiceSounds.susie
+        ),
 
     ralsei:
-        new Audio(voiceSounds.ralsei)
+        new Audio(
+            voiceSounds.ralsei
+        )
 
 };
+
+
+voiceAudio.susie.preload =
+    "auto";
+
+voiceAudio.ralsei.preload =
+    "auto";
+
+
+voiceAudio.susie.volume =
+    1;
+
+voiceAudio.ralsei.volume =
+    1;
 
 
 /* ==================================================
@@ -484,7 +453,7 @@ const sequence =
 
 
 /* ==================================================
-   PLAYER STATE
+   STATE
 ================================================== */
 
 let currentIndex = 0;
@@ -492,13 +461,17 @@ let currentIndex = 0;
 let currentCharacter =
     "susie";
 
-let typing = false;
+let currentFullText =
+    "";
 
-let typingTimer = null;
+let textPosition =
+    0;
 
-let currentFullText = "";
+let typing =
+    false;
 
-let textPosition = 0;
+let typingTimer =
+    null;
 
 
 /* ==================================================
@@ -510,30 +483,25 @@ const dialogue =
         "dialogue"
     );
 
-
 const character =
     document.getElementById(
         "character"
     );
-
 
 const text =
     document.getElementById(
         "text"
     );
 
-
 const indicator =
     document.getElementById(
         "continueIndicator"
     );
 
-
 const eventScreen =
     document.getElementById(
         "eventScreen"
     );
-
 
 const eventText =
     document.getElementById(
@@ -542,66 +510,46 @@ const eventText =
 
 
 /* ==================================================
-   AUDIO UNLOCK
-==================================================
-
-   Mobile browsers can block audio until
-   the user interacts with the page.
-
-   We silently initialize the sounds after
-   the first tap/key press.
+   PLAY VOICE
 ================================================== */
 
-let audioUnlocked = false;
+function playVoice(name) {
 
+    const audio =
+        voiceAudio[name];
 
-function unlockAudio() {
-
-    if (audioUnlocked) {
+    if (!audio) {
         return;
     }
 
-    audioUnlocked = true;
+
+    audio.pause();
+
+    audio.currentTime = 0;
 
 
-    Object.values(
-        voiceAudio
-    ).forEach(
-        audio => {
+    audio.playbackRate =
+        0.95 +
+        Math.random() * 0.1;
 
-            audio.volume = 0;
 
-            audio.play()
-                .then(
-                    () => {
+    audio.play()
+        .catch(
+            error => {
 
-                        audio.pause();
-
-                        audio.currentTime =
-                            0;
-
-                        audio.volume =
-                            1;
-
-                    }
-                )
-                .catch(
-                    () => {
-
-                        audio.volume =
-                            1;
-
-                    }
+                console.log(
+                    "Audio could not play:",
+                    error
                 );
 
-        }
-    );
+            }
+        );
 
 }
 
 
 /* ==================================================
-   PLAY CURRENT ENTRY
+   PLAY CURRENT
 ================================================== */
 
 function playCurrent() {
@@ -648,7 +596,7 @@ function playCurrent() {
 
 
 /* ==================================================
-   PLAY DIALOGUE
+   DIALOGUE
 ================================================== */
 
 function playDialogue(entry) {
@@ -666,21 +614,23 @@ function playDialogue(entry) {
         "susie";
 
 
-    const characterSprites =
+    const sprites =
         characters[
             currentCharacter
         ];
 
 
-    character.src =
-        characterSprites[
-            entry.sprite
-        ] ||
-        characterSprites[
-            Object.keys(
-                characterSprites
-            )[0]
-        ];
+    if (sprites) {
+
+        character.src =
+            sprites[
+                entry.sprite
+            ] ||
+            Object.values(
+                sprites
+            )[0];
+
+    }
 
 
     currentFullText =
@@ -709,7 +659,7 @@ function playDialogue(entry) {
 
 
 /* ==================================================
-   TYPE TEXT
+   TYPE LETTER
 ================================================== */
 
 function typeNextCharacter() {
@@ -732,32 +682,31 @@ function typeNextCharacter() {
     }
 
 
-    const currentChar =
+    const char =
         currentFullText[
             textPosition
         ];
 
 
     text.textContent +=
-        currentChar;
+        char;
 
 
     textPosition++;
 
 
     /*
-       Play voice audio for actual
-       letters/numbers.
-
-       Spaces and punctuation are
-       silent.
+       Don't play voice on:
+       spaces
+       punctuation
+       line breaks
     */
 
     if (
-        currentChar !== " " &&
-        currentChar !== "\n" &&
+        char !== " " &&
+        char !== "\n" &&
         !/[.,!?;:'"()\[\]{}]/.test(
-            currentChar
+            char
         )
     ) {
 
@@ -768,69 +717,10 @@ function typeNextCharacter() {
     }
 
 
-    /*
-       Change this number to adjust
-       typing speed.
-
-       35 = fairly fast
-       50 = slower
-       20 = very fast
-    */
-
     typingTimer =
         setTimeout(
             typeNextCharacter,
-            35
-        );
-
-}
-
-
-/* ==================================================
-   PLAY CHARACTER VOICE
-================================================== */
-
-function playVoice(characterName) {
-
-    const audio =
-        voiceAudio[
-            characterName
-        ];
-
-
-    if (!audio) {
-        return;
-    }
-
-
-    /*
-       Restart the sound every letter.
-    */
-
-    audio.pause();
-
-    audio.currentTime =
-        0;
-
-
-    /*
-       Tiny pitch variation so
-       every letter doesn't sound
-       completely identical.
-    */
-
-    audio.playbackRate =
-        0.95 +
-        Math.random() * 0.10;
-
-
-    audio.volume =
-        1;
-
-
-    audio.play()
-        .catch(
-            () => {}
+            55
         );
 
 }
@@ -842,12 +732,10 @@ function playVoice(characterName) {
 
 function advance() {
 
-    unlockAudio();
-
 
     /*
        If text is still typing,
-       immediately finish it.
+       finish the line immediately.
     */
 
     if (typing) {
@@ -910,34 +798,31 @@ function playEvent(entry) {
 
     const duration =
         Number(
-            entry.duration ||
-            1000
+            entry.duration || 1000
         );
 
 
     if (
         entry.eventType ===
-        "laugh"
-    ) {
-
-        playLaugh(
-            duration
-        );
-
-    }
-
-
-    else if (
-        entry.eventType ===
         "shake"
     ) {
 
-        playShake(
+        shakeEvent(
             duration
         );
 
     }
 
+    else if (
+        entry.eventType ===
+        "laugh"
+    ) {
+
+        laughEvent(
+            duration
+        );
+
+    }
 
     else {
 
@@ -952,70 +837,16 @@ function playEvent(entry) {
 
 
 /* ==================================================
-   LAUGH EVENT
+   SHAKE
 ================================================== */
 
-function playLaugh(duration) {
+function shakeEvent(duration) {
 
     const start =
         Date.now();
 
 
-    function animate() {
-
-        const elapsed =
-            Date.now() -
-            start;
-
-
-        if (
-            elapsed >=
-            duration
-        ) {
-
-            document.body.style.transform =
-                "";
-
-            finishEvent();
-
-            return;
-
-        }
-
-
-        const offset =
-            Math.sin(
-                elapsed / 45
-            ) * 5;
-
-
-        document.body.style.transform =
-            `translateX(${offset}px)`;
-
-
-        requestAnimationFrame(
-            animate
-        );
-
-    }
-
-
-    animate();
-
-}
-
-
-/* ==================================================
-   SHAKE EVENT
-================================================== */
-
-function playShake(duration) {
-
-    const start =
-        Date.now();
-
-
-    function shake() {
+    function loop() {
 
         const elapsed =
             Date.now() -
@@ -1038,27 +869,78 @@ function playShake(duration) {
 
 
         const x =
-            (Math.random() - 0.5) *
-            14;
-
+            (Math.random() - 0.5) * 12;
 
         const y =
-            (Math.random() - 0.5) *
-            14;
+            (Math.random() - 0.5) * 12;
 
 
         document.body.style.transform =
-            `translate(${x}px, ${y}px)`;
+            `translate(${x}px,${y}px)`;
 
 
         requestAnimationFrame(
-            shake
+            loop
         );
 
     }
 
 
-    shake();
+    loop();
+
+}
+
+
+/* ==================================================
+   LAUGH
+================================================== */
+
+function laughEvent(duration) {
+
+    const start =
+        Date.now();
+
+
+    function loop() {
+
+        const elapsed =
+            Date.now() -
+            start;
+
+
+        if (
+            elapsed >=
+            duration
+        ) {
+
+            document.body.style.transform =
+                "";
+
+            finishEvent();
+
+            return;
+
+        }
+
+
+        const x =
+            Math.sin(
+                elapsed / 40
+            ) * 5;
+
+
+        document.body.style.transform =
+            `translateX(${x}px)`;
+
+
+        requestAnimationFrame(
+            loop
+        );
+
+    }
+
+
+    loop();
 
 }
 
@@ -1072,13 +954,10 @@ function finishEvent() {
     document.body.style.transform =
         "";
 
-
     eventScreen.style.display =
         "none";
 
-
     currentIndex++;
-
 
     playCurrent();
 
@@ -1086,7 +965,7 @@ function finishEvent() {
 
 
 /* ==================================================
-   FINISH PROJECT
+   FINISH
 ================================================== */
 
 function finish() {
@@ -1094,15 +973,9 @@ function finish() {
     dialogue.style.display =
         "none";
 
-
     eventScreen.style.display =
         "none";
 
-
-    /*
-       Stop any currently playing
-       character sound.
-    */
 
     Object.values(
         voiceAudio
@@ -1121,15 +994,12 @@ function finish() {
 
 
 /* ==================================================
-   KEYBOARD
+   ENTER
 ================================================== */
 
 document.addEventListener(
     "keydown",
     function(event) {
-
-        unlockAudio();
-
 
         if (
             event.key ===
@@ -1147,30 +1017,17 @@ document.addEventListener(
 
 
 /* ==================================================
-   MOBILE / TOUCH
+   MOBILE
 ================================================== */
 
 document.addEventListener(
     "pointerdown",
-    function(event) {
-
-        unlockAudio();
-
+    function() {
 
         /*
-           Don't advance while an
-           event is running.
+           Mobile browsers allow audio
+           after this user interaction.
         */
-
-        if (
-            eventScreen.style.display ===
-            "flex"
-        ) {
-
-            return;
-
-        }
-
 
         advance();
 
@@ -1187,4 +1044,5 @@ playCurrent();
 </script>
 
 </body>
+
 </html>
