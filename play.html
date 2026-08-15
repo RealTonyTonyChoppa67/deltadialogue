@@ -7,35 +7,51 @@
 
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    content="width=device-width, initial-scale=1.0, user-scalable=no"
 >
 
-<title>Dialogue Player</title>
+<title>Deltarune Dialogue</title>
 
 <style>
 
+@font-face {
+
+    font-family: "8-bit Operator JVE";
+
+    src: url("8bitoperator_jve.ttf") format("truetype");
+
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
+
 
 html,
 body {
 
+    margin: 0;
+
     width: 100%;
     height: 100%;
 
-    margin: 0;
-
-    background: black;
-
     overflow: hidden;
+
+    background: #000;
 
     color: white;
 
-    user-select: none;
-    -webkit-user-select: none;
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
 
 }
+
 
 body {
 
@@ -43,79 +59,76 @@ body {
 
     justify-content: center;
 
-    align-items: flex-end;
+    align-items: center;
+
+    touch-action: manipulation;
 
 }
 
 
-/* =========================================
+/* ==========================================
    GAME
-========================================= */
+========================================== */
 
 #game {
 
     position: relative;
 
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
 
-    background: black;
+    max-width: 1600px;
 
-    display: flex;
+    overflow: hidden;
 
-    justify-content: center;
-
-    align-items: flex-end;
+    background: #000;
 
 }
 
 
-/* =========================================
-   DIALOGUE
-========================================= */
+/* ==========================================
+   DIALOGUE BOX
+========================================== */
 
-.dialogue {
+#dialogueBox {
 
-    position: relative;
+    position: absolute;
 
-    width: min(
-        100vw,
-        1100px
-    );
+    left: 50%;
 
-    margin-bottom: 12px;
+    bottom: 2.5%;
 
-    display: none;
+    transform: translateX(-50%);
+
+    width: 92%;
+
+    z-index: 10;
 
 }
 
 
-.dialogue-background {
+#dialogueBackground {
+
+    display: block;
 
     width: 100%;
 
     height: auto;
 
-    display: block;
-
 }
 
 
-/* =========================================
-   CHARACTER
-========================================= */
-
-.character {
+#character {
 
     position: absolute;
 
     left: 5%;
 
-    bottom: 8%;
+    bottom: 7%;
 
     width: 20%;
 
-    height: 72%;
+    height: 75%;
 
     object-fit: contain;
 
@@ -126,11 +139,7 @@ body {
 }
 
 
-/* =========================================
-   TEXT
-========================================= */
-
-.text {
+#dialogueText {
 
     position: absolute;
 
@@ -138,36 +147,37 @@ body {
 
     right: 6%;
 
-    top: 25%;
+    top: 24%;
 
-    bottom: 18%;
+    bottom: 17%;
 
     color: white;
 
     font-family:
         "8-bit Operator JVE",
-        "Courier New",
         monospace;
 
     font-size:
         clamp(
-            14px,
+            15px,
             2.4vw,
-            28px
+            32px
         );
 
     line-height: 1.35;
 
     white-space: pre-wrap;
 
+    overflow-wrap: break-word;
+
     overflow: hidden;
 
 }
 
 
-/* =========================================
-   CONTINUE
-========================================= */
+/* ==========================================
+   TAP INDICATOR
+========================================== */
 
 #continueIndicator {
 
@@ -175,82 +185,43 @@ body {
 
     right: 3%;
 
-    bottom: 8%;
+    bottom: 7%;
 
-    font-size: 18px;
-
-    display: none;
+    font-size: 20px;
 
     animation:
         blink 0.8s infinite;
 
+    display: none;
+
 }
+
 
 @keyframes blink {
 
+    0%,
+    100% {
+        opacity: 1;
+    }
+
     50% {
-        opacity: 0.2;
+        opacity: 0;
     }
 
 }
 
 
-/* =========================================
-   START SCREEN
-========================================= */
+/* ==========================================
+   EVENT OVERLAY
+========================================== */
 
-#startScreen {
-
-    position: absolute;
-
-    inset: 0;
-
-    background: black;
-
-    z-index: 100;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    cursor: pointer;
-
-    font-family:
-        "8-bit Operator JVE",
-        "Courier New",
-        monospace;
-
-}
-
-
-#startText {
-
-    font-size:
-        clamp(
-            16px,
-            4vw,
-            30px
-        );
-
-    animation:
-        blink 1s infinite;
-
-}
-
-
-/* =========================================
-   EVENTS
-========================================= */
-
-#eventScreen {
+#eventOverlay {
 
     position: absolute;
 
     inset: 0;
 
-    background: black;
+    z-index: 20;
 
     display: none;
 
@@ -258,16 +229,15 @@ body {
 
     align-items: center;
 
-    z-index: 50;
+    background: #000;
 
 }
 
 
-.event-text {
+#eventText {
 
     font-family:
         "8-bit Operator JVE",
-        "Courier New",
         monospace;
 
     font-size:
@@ -282,36 +252,157 @@ body {
 }
 
 
-/* =========================================
+/* ==========================================
+   START SCREEN
+========================================== */
+
+#startScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 50;
+
+    background: #000;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-direction: column;
+
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
+
+}
+
+
+#startScreen button {
+
+    margin-top: 20px;
+
+    padding: 14px 25px;
+
+    border: 2px solid white;
+
+    background: black;
+
+    color: white;
+
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
+
+    font-size: 18px;
+
+    cursor: pointer;
+
+}
+
+
+#startScreen button:hover {
+
+    background: white;
+
+    color: black;
+
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
+#errorScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: 100;
+
+    background: #000;
+
+    display: none;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-direction: column;
+
+    padding: 25px;
+
+    text-align: center;
+
+}
+
+
+#errorScreen button {
+
+    margin-top: 20px;
+
+    padding: 12px 20px;
+
+    background: white;
+
+    color: black;
+
+    border: 0;
+
+    font-family:
+        "8-bit Operator JVE",
+        monospace;
+
+}
+
+
+/* ==========================================
    MOBILE
-========================================= */
+========================================== */
 
-@media (max-width: 600px) {
+@media (max-width: 700px) {
 
-    .dialogue {
+    #dialogueBox {
 
-        width: 100%;
+        width: 96%;
 
-        margin-bottom: 5px;
+        bottom: 2%;
 
     }
 
 
-    .text {
+    #character {
+
+        left: 4%;
+
+        width: 22%;
+
+        height: 72%;
+
+    }
+
+
+    #dialogueText {
+
+        left: 29%;
+
+        right: 5%;
+
+        top: 24%;
+
+        bottom: 17%;
 
         font-size:
             clamp(
                 10px,
-                3.2vw,
-                18px
+                3.3vw,
+                20px
             );
-
-    }
-
-
-    .character {
-
-        width: 21%;
 
     }
 
@@ -328,64 +419,76 @@ body {
 <div id="game">
 
 
-    <!-- START -->
+    <!-- ==================================
+         DIALOGUE
+    =================================== -->
 
-    <div id="startScreen">
-
-        <div id="startText">
-            TAP TO START
-        </div>
-
-    </div>
-
-
-    <!-- DIALOGUE -->
-
-    <div
-        id="dialogue"
-        class="dialogue"
-    >
+    <div id="dialogueBox">
 
         <img
-            class="dialogue-background"
+            id="dialogueBackground"
             src="https://i.ibb.co/21Z5G7Yn/Untitled7-20260815081350.png"
-            alt="Dialogue box"
+            alt=""
         >
-
 
         <img
             id="character"
-            class="character"
             src=""
             alt=""
         >
 
+        <div id="dialogueText"></div>
 
-        <div
-            id="text"
-            class="text"
-        ></div>
-
-
-        <div
-            id="continueIndicator"
-        >
+        <div id="continueIndicator">
             ▼
         </div>
 
     </div>
 
 
-    <!-- EVENTS -->
+    <!-- ==================================
+         EVENTS
+    =================================== -->
 
-    <div
-        id="eventScreen"
-    >
+    <div id="eventOverlay">
 
-        <div
-            id="eventText"
-            class="event-text"
-        ></div>
+        <div id="eventText"></div>
+
+    </div>
+
+
+    <!-- ==================================
+         START SCREEN
+    =================================== -->
+
+    <div id="startScreen">
+
+        <div>
+            DIALOGUE
+        </div>
+
+        <button id="startButton">
+            TAP TO START
+        </button>
+
+    </div>
+
+
+    <!-- ==================================
+         ERROR SCREEN
+    =================================== -->
+
+    <div id="errorScreen">
+
+        <div id="errorMessage">
+            No dialogue project was found.
+        </div>
+
+        <button
+            onclick="location.href='index.html'"
+        >
+            BACK TO GENERATOR
+        </button>
 
     </div>
 
@@ -395,535 +498,317 @@ body {
 <script>
 
 
-/* ==================================================
-   CHARACTER SPRITES
-
-   ADD NEW CHARACTERS HERE
-================================================== */
+/* ==========================================
+   CHARACTER DATA
+========================================== */
 
 const characters = {
 
-
-    /* ----------------------------------------------
-       SUSIE
-    ---------------------------------------------- */
-
     susie: {
 
-        neutral:
-            "https://i.ibb.co/G4nYggzv/IMG-0004.jpg",
+        name: "Susie",
 
-        mad:
-            "https://i.ibb.co/gFHhswgR/IMG-0005.jpg",
+        voice:
+            "susie.ogg",
 
-        evil_1:
-            "https://i.ibb.co/tPcV6xPn/IMG-0006.jpg",
+        sprites: {
 
-        evil_2:
-            "https://i.ibb.co/wZrZJrDd/IMG-0007.jpg",
+            neutral:
+                "https://i.ibb.co/G4nYggzv/IMG-0004.jpg",
 
-        evil_3:
-            "https://i.ibb.co/bRrjQF5B/IMG-0008.jpg",
+            mad:
+                "https://i.ibb.co/gFHhswgR/IMG-0005.jpg",
 
-        goofyMad:
-            "https://i.ibb.co/Jj3mHthd/IMG-0009.jpg",
+            evil_1:
+                "https://i.ibb.co/tPcV6xPn/IMG-0006.jpg",
 
-        awkward:
-            "https://i.ibb.co/Cp225DcB/IMG-0010.jpg",
+            evil_2:
+                "https://i.ibb.co/wZrZJrDd/IMG-0007.jpg",
 
-        madEvil:
-            "https://i.ibb.co/5gYCTqtx/IMG-0012.jpg"
+            evil_3:
+                "https://i.ibb.co/bRrjQF5B/IMG-0008.jpg",
+
+            goofyMad:
+                "https://i.ibb.co/Jj3mHthd/IMG-0009.jpg",
+
+            awkward:
+                "https://i.ibb.co/Cp225DcB/IMG-0010.jpg",
+
+            madEvil:
+                "https://i.ibb.co/5gYCTqtx/IMG-0012.jpg"
+
+        }
 
     },
 
 
-    /* ----------------------------------------------
-       RALSEI
-    ---------------------------------------------- */
-
     ralsei: {
 
-        happy:
-            "https://i.ibb.co/G3fVqRj7/IMG-0014.jpg",
+        name: "Ralsei",
 
-        happyBlush:
-            "https://i.ibb.co/5xxjf0kk/IMG-0013.jpg",
+        voice:
+            "ralsei.ogg",
 
-        shockWorried:
-            "https://i.ibb.co/gMxqsXtF/IMG-0015.jpg",
+        sprites: {
 
-        yell:
-            "https://i.ibb.co/k66gNgxL/IMG-0016.jpg",
+            happy:
+                "https://i.ibb.co/G3fVqRj7/IMG-0014.jpg",
 
-        disappoint:
-            "https://i.ibb.co/4RQGNnv3/IMG-0017.jpg"
+            happyBlush:
+                "https://i.ibb.co/5xxjf0kk/IMG-0013.jpg",
 
-    }
+            shockWorried:
+                "https://i.ibb.co/gMxqsXtF/IMG-0015.jpg",
 
+            yell:
+                "https://i.ibb.co/k66gNgxL/IMG-0016.jpg",
 
-    /*
-       ADD MORE CHARACTERS LIKE THIS:
-
-       noelle: {
-
-           happy:
-               "IMAGE URL",
-
-           worried:
-               "IMAGE URL"
-
-       }
-    */
-
-};
-
-
-/* ==================================================
-   CHARACTER VOICE FILES
-
-   ADD NEW VOICE CLIPS HERE
-================================================== */
-
-const voiceFiles = {
-
-
-    /* ----------------------------------------------
-       SUSIE
-    ---------------------------------------------- */
-
-    susie:
-        "susie.ogg",
-
-
-    /* ----------------------------------------------
-       RALSEI
-    ---------------------------------------------- */
-
-    ralsei:
-        "ralsei.ogg"
-
-
-    /*
-       ADD ANOTHER CHARACTER LIKE THIS:
-
-       noelle:
-           "noelle.ogg"
-
-    */
-
-};
-
-
-/* ==================================================
-   AUDIO ENGINE
-================================================== */
-
-let audioContext =
-    null;
-
-
-const voiceBuffers =
-    {};
-
-
-let audioReady =
-    false;
-
-
-/* ==================================================
-   LOAD VOICES
-================================================== */
-
-async function prepareAudio() {
-
-
-    if (audioReady) {
-
-        return;
-
-    }
-
-
-    /*
-       Create AudioContext after
-       the user taps the screen.
-    */
-
-    audioContext =
-        new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
-
-
-    /*
-       Some mobile browsers start
-       the context suspended.
-    */
-
-    if (
-        audioContext.state ===
-        "suspended"
-    ) {
-
-        await audioContext.resume();
-
-    }
-
-
-    /*
-       Load every character's
-       voice file.
-    */
-
-    for (
-        const characterName
-        in voiceFiles
-    ) {
-
-
-        try {
-
-            const response =
-                await fetch(
-                    voiceFiles[
-                        characterName
-                    ]
-                );
-
-
-            if (
-                !response.ok
-            ) {
-
-                console.error(
-                    "Voice file not found:",
-                    voiceFiles[
-                        characterName
-                    ]
-                );
-
-                continue;
-
-            }
-
-
-            const data =
-                await response.arrayBuffer();
-
-
-            voiceBuffers[
-                characterName
-            ] =
-                await audioContext.decodeAudioData(
-                    data
-                );
-
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "Failed to load voice:",
-                characterName,
-                error
-            );
+            disappoint:
+                "https://i.ibb.co/4RQGNnv3/IMG-0017.jpg"
 
         }
 
     }
 
+};
 
-    audioReady =
-        true;
 
-}
-
-
-/* ==================================================
-   PLAY VOICE
-================================================== */
-
-function playVoice(
-    characterName
-) {
-
-
-    if (
-        !audioContext
-    ) {
-
-        return;
-
-    }
-
-
-    const buffer =
-        voiceBuffers[
-            characterName
-        ];
-
-
-    if (!buffer) {
-
-        return;
-
-    }
-
-
-    /*
-       Create a fresh Web Audio
-       source.
-
-       Unlike HTML Audio,
-       this does NOT create another
-       DOM element or reload the file.
-    */
-
-    const source =
-        audioContext.createBufferSource();
-
-
-    source.buffer =
-        buffer;
-
-
-    /*
-       Volume control.
-    */
-
-    const gain =
-        audioContext.createGain();
-
-
-    gain.gain.value =
-        0.25;
-
-
-    /*
-       Slight random pitch.
-
-       Keeps repeated sounds from
-       sounding completely identical.
-    */
-
-    source.playbackRate.value =
-        0.95 +
-        Math.random() * 0.10;
-
-
-    source.connect(
-        gain
-    );
-
-
-    gain.connect(
-        audioContext.destination
-    );
-
-
-    source.start(0);
-
-}
-
-
-/* ==================================================
-   PROJECT DATA
-================================================== */
-
-const savedProject =
-    localStorage.getItem(
-        "deltaruneDialogueProject"
-    );
-
-
-if (!savedProject) {
-
-    document.body.innerHTML = `
-
-        <div style="
-            color:white;
-            font-family:Arial;
-            text-align:center;
-            padding:40px;
-        ">
-
-            No dialogue project found.
-
-        </div>
-
-    `;
-
-    throw new Error(
-        "No dialogue project found"
-    );
-
-}
-
-
-let project;
-
-
-try {
-
-    project =
-        JSON.parse(
-            savedProject
-        );
-
-}
-
-catch {
-
-    document.body.innerHTML = `
-
-        <div style="
-            color:white;
-            font-family:Arial;
-            text-align:center;
-            padding:40px;
-        ">
-
-            Invalid dialogue project.
-
-        </div>
-
-    `;
-
-    throw new Error(
-        "Invalid dialogue project"
-    );
-
-}
-
-
-const sequence =
-    project.sequence || [];
-
-
-/* ==================================================
-   STATE
-================================================== */
-
-let currentIndex =
-    0;
-
-
-let currentCharacter =
-    "susie";
-
-
-let currentFullText =
-    "";
-
-
-let textPosition =
-    0;
-
-
-let typing =
-    false;
-
-
-let typingTimer =
-    null;
-
-
-let eventRunning =
-    false;
-
-
-let gameStarted =
-    false;
-
-
-/* ==================================================
+/* ==========================================
    ELEMENTS
-================================================== */
+========================================== */
 
-const startScreen =
+const dialogueText =
     document.getElementById(
-        "startScreen"
+        "dialogueText"
     );
 
-
-const dialogue =
-    document.getElementById(
-        "dialogue"
-    );
-
-
-const character =
+const characterImage =
     document.getElementById(
         "character"
     );
 
-
-const text =
-    document.getElementById(
-        "text"
-    );
-
-
-const indicator =
+const continueIndicator =
     document.getElementById(
         "continueIndicator"
     );
 
-
-const eventScreen =
+const eventOverlay =
     document.getElementById(
-        "eventScreen"
+        "eventOverlay"
     );
-
 
 const eventText =
     document.getElementById(
         "eventText"
     );
 
+const startScreen =
+    document.getElementById(
+        "startScreen"
+    );
 
-/* ==================================================
-   START GAME
-================================================== */
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
 
-async function startGame() {
+const errorScreen =
+    document.getElementById(
+        "errorScreen"
+    );
+
+const errorMessage =
+    document.getElementById(
+        "errorMessage"
+    );
 
 
-    if (gameStarted) {
+/* ==========================================
+   PROJECT
+========================================== */
 
-        return;
+let sequence = [];
+
+let currentIndex = 0;
+
+let typing = false;
+
+let currentText = "";
+
+let typingPosition = 0;
+
+let typingTimer = null;
+
+
+/* ==========================================
+   AUDIO
+========================================== */
+
+/*
+    One reusable audio element.
+
+    This is important because repeatedly creating
+    audio objects for every letter can cause lag,
+    especially on mobile.
+*/
+
+const voiceAudio =
+    new Audio();
+
+voiceAudio.preload =
+    "auto";
+
+voiceAudio.loop =
+    true;
+
+voiceAudio.volume =
+    0.25;
+
+
+let currentVoice =
+    null;
+
+
+/* ==========================================
+   LOAD PROJECT
+========================================== */
+
+function loadProject() {
+
+    const saved =
+        localStorage.getItem(
+            "deltaruneDialogueProject"
+        );
+
+
+    if (!saved) {
+
+        showError(
+            "No dialogue project was found. Generate a dialogue from index.html first."
+        );
+
+        return false;
 
     }
 
 
-    gameStarted =
-        true;
+    try {
+
+        const data =
+            JSON.parse(
+                saved
+            );
 
 
-    startScreen.style.display =
-        "none";
+        if (
+            !data ||
+            !Array.isArray(
+                data.sequence
+            )
+        ) {
+
+            throw new Error(
+                "Invalid sequence"
+            );
+
+        }
 
 
-    /*
-       Audio is initialized directly
-       after user interaction.
-    */
-
-    await prepareAudio();
+        sequence =
+            data.sequence;
 
 
-    playCurrent();
+        if (
+            sequence.length === 0
+        ) {
+
+            showError(
+                "Your project doesn't contain any dialogue."
+            );
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Project loading error:",
+            error
+        );
+
+
+        showError(
+            "The dialogue project could not be loaded."
+        );
+
+        return false;
+
+    }
 
 }
 
 
-/* ==================================================
-   PLAY CURRENT
-================================================== */
+/* ==========================================
+   ERROR
+========================================== */
 
-function playCurrent() {
+function showError(message) {
+
+    errorMessage.textContent =
+        message;
+
+    errorScreen.style.display =
+        "flex";
+
+}
+
+
+/* ==========================================
+   START
+========================================== */
+
+startButton.addEventListener(
+    "click",
+    function() {
+
+        startScreen.style.display =
+            "none";
+
+        startDialogue();
+
+    }
+);
+
+
+/* ==========================================
+   START DIALOGUE
+========================================== */
+
+function startDialogue() {
+
+    currentIndex =
+        0;
+
+    playCurrentEntry();
+
+}
+
+
+/* ==========================================
+   PLAY ENTRY
+========================================== */
+
+function playCurrentEntry() {
+
+    clearTyping();
+
+    stopVoice();
 
 
     if (
@@ -931,7 +816,7 @@ function playCurrent() {
         sequence.length
     ) {
 
-        finish();
+        finishDialogue();
 
         return;
 
@@ -939,19 +824,12 @@ function playCurrent() {
 
 
     const entry =
-        sequence[
-            currentIndex
-        ];
+        sequence[currentIndex];
 
 
-    if (
-        entry.type ===
-        "dialogue"
-    ) {
+    if (!entry) {
 
-        playDialogue(
-            entry
-        );
+        advance();
 
         return;
 
@@ -972,82 +850,101 @@ function playCurrent() {
     }
 
 
-    currentIndex++;
-
-    playCurrent();
+    playDialogue(
+        entry
+    );
 
 }
 
 
-/* ==================================================
-   DIALOGUE
-================================================== */
+/* ==========================================
+   PLAY DIALOGUE
+========================================== */
 
-function playDialogue(
-    entry
-) {
+function playDialogue(entry) {
 
-
-    eventRunning =
-        false;
-
-
-    eventScreen.style.display =
+    eventOverlay.style.display =
         "none";
 
 
-    dialogue.style.display =
-        "block";
-
-
-    currentCharacter =
-        entry.character ||
-        "susie";
-
-
-    const spriteSet =
+    const character =
         characters[
-            currentCharacter
+            entry.character
         ];
 
 
-    if (spriteSet) {
+    if (!character) {
 
+        advance();
 
-        character.src =
-            spriteSet[
-                entry.sprite
-            ] ||
-            Object.values(
-                spriteSet
-            )[0];
-
+        return;
 
     }
 
 
-    currentFullText =
-        entry.text || "";
+    /*
+       Set sprite
+    */
+
+    const sprite =
+        character.sprites[
+            entry.sprite
+        ];
 
 
-    textPosition =
-        0;
+    if (sprite) {
+
+        characterImage.src =
+            sprite;
+
+        characterImage.style.display =
+            "block";
+
+    }
+
+    else {
+
+        characterImage.style.display =
+            "none";
+
+    }
 
 
-    text.textContent =
+    /*
+       Text
+    */
+
+    currentText =
+        String(
+            entry.text || ""
+        );
+
+
+    dialogueText.textContent =
         "";
+
+
+    continueIndicator.style.display =
+        "none";
 
 
     typing =
         true;
 
+    typingPosition =
+        0;
 
-    indicator.style.display =
-        "none";
 
+    /*
+       Start voice before typing.
 
-    clearTimeout(
-        typingTimer
+       The first dialogue therefore gets
+       the same audio treatment as every
+       dialogue after it.
+    */
+
+    startVoice(
+        character.voice
     );
 
 
@@ -1056,16 +953,20 @@ function playDialogue(
 }
 
 
-/* ==================================================
+/* ==========================================
    TYPE TEXT
-================================================== */
+========================================== */
 
 function typeNextCharacter() {
 
+    if (!typing) {
+        return;
+    }
+
 
     if (
-        textPosition >=
-        currentFullText.length
+        typingPosition >=
+        currentText.length
     ) {
 
         finishTyping();
@@ -1075,60 +976,62 @@ function typeNextCharacter() {
     }
 
 
-    const currentChar =
-        currentFullText[
-            textPosition
+    dialogueText.textContent +=
+        currentText[
+            typingPosition
         ];
 
 
-    text.textContent +=
-        currentChar;
-
-
-    textPosition++;
+    typingPosition++;
 
 
     /*
-       Only actual letters and numbers
-       trigger voice.
-
-       This prevents weird noises
-       on punctuation.
+       Skip audio on spaces and line breaks.
+       It sounds much closer to game dialogue.
     */
 
+    const character =
+        currentText[
+            typingPosition - 1
+        ];
+
+
     if (
-        /[a-zA-Z0-9]/.test(
-            currentChar
-        )
+        character !== " " &&
+        character !== "\n" &&
+        character !== "\r"
     ) {
 
-        playVoice(
-            currentCharacter
-        );
+        restartVoicePulse();
 
     }
 
 
     /*
-       Typing speed.
+       Small delay between letters.
 
-       Lower number = faster.
+       Using setTimeout rather than a giant
+       pile of audio objects keeps mobile
+       browsers happier.
     */
 
     typingTimer =
         setTimeout(
             typeNextCharacter,
-            45
+            32
         );
 
 }
 
 
-/* ==================================================
+/* ==========================================
    FINISH TYPING
-================================================== */
+========================================== */
 
 function finishTyping() {
+
+    typing =
+        false;
 
 
     clearTimeout(
@@ -1136,115 +1039,226 @@ function finishTyping() {
     );
 
 
-    typing =
-        false;
+    dialogueText.textContent =
+        currentText;
 
 
-    text.textContent =
-        currentFullText;
-
-
-    textPosition =
-        currentFullText.length;
-
-
-    indicator.style.display =
+    continueIndicator.style.display =
         "block";
 
 }
 
 
-/* ==================================================
-   ADVANCE
-================================================== */
+/* ==========================================
+   CLEAR TYPING
+========================================== */
 
-function advance() {
+function clearTyping() {
 
-
-    if (!gameStarted) {
-
-        startGame();
-
-        return;
-
-    }
+    typing =
+        false;
 
 
-    /*
-       Don't advance during events.
-    */
-
-    if (eventRunning) {
-
-        return;
-
-    }
+    clearTimeout(
+        typingTimer
+    );
 
 
-    /*
-       First tap while typing
-       instantly finishes the text.
-    */
-
-    if (typing) {
-
-
-        clearTimeout(
-            typingTimer
-        );
-
-
-        text.textContent =
-            currentFullText;
-
-
-        textPosition =
-            currentFullText.length;
-
-
-        typing =
-            false;
-
-
-        indicator.style.display =
-            "block";
-
-
-        return;
-
-    }
-
-
-    indicator.style.display =
-        "none";
-
-
-    currentIndex++;
-
-
-    playCurrent();
+    typingTimer =
+        null;
 
 }
 
 
-/* ==================================================
+/* ==========================================
+   SKIP TYPING
+========================================== */
+
+function skipTyping() {
+
+    if (!typing) {
+        return false;
+    }
+
+
+    clearTyping();
+
+
+    dialogueText.textContent =
+        currentText;
+
+
+    continueIndicator.style.display =
+        "block";
+
+
+    return true;
+
+}
+
+
+/* ==========================================
+   AUDIO
+========================================== */
+
+function startVoice(src) {
+
+    if (!src) {
+        return;
+    }
+
+
+    if (
+        currentVoice ===
+        src
+    ) {
+
+        return;
+
+    }
+
+
+    currentVoice =
+        src;
+
+
+    voiceAudio.pause();
+
+    voiceAudio.currentTime =
+        0;
+
+    voiceAudio.src =
+        src;
+
+    voiceAudio.load();
+
+
+    /*
+       play() may be blocked until the
+       user interacts with the page.
+
+       The Start button provides that
+       interaction on mobile.
+    */
+
+    const promise =
+        voiceAudio.play();
+
+
+    if (
+        promise &&
+        promise.catch
+    ) {
+
+        promise.catch(
+            error => {
+
+                console.log(
+                    "Voice playback waiting for interaction:",
+                    error
+                );
+
+            }
+        );
+
+    }
+
+}
+
+
+/*
+    Instead of creating a new audio object
+    for every character, briefly restart
+    the SAME audio element.
+
+    This prevents hundreds of simultaneous
+    audio objects from building up.
+*/
+
+function restartVoicePulse() {
+
+    if (!voiceAudio.src) {
+        return;
+    }
+
+
+    try {
+
+        voiceAudio.currentTime =
+            0;
+
+
+        if (
+            voiceAudio.paused
+        ) {
+
+            const promise =
+                voiceAudio.play();
+
+
+            if (
+                promise &&
+                promise.catch
+            ) {
+
+                promise.catch(
+                    () => {}
+                );
+
+            }
+
+        }
+
+    }
+
+    catch {
+
+        /*
+           Ignore browser audio timing errors.
+        */
+
+    }
+
+}
+
+
+/* ==========================================
+   STOP AUDIO
+========================================== */
+
+function stopVoice() {
+
+    voiceAudio.pause();
+
+    voiceAudio.currentTime =
+        0;
+
+    currentVoice =
+        null;
+
+}
+
+
+/* ==========================================
    EVENTS
-================================================== */
+========================================== */
 
-function playEvent(
-    entry
-) {
+function playEvent(entry) {
 
+    clearTyping();
 
-    eventRunning =
-        true;
+    stopVoice();
 
 
-    dialogue.style.display =
+    dialogueText.textContent =
+        "";
+
+
+    characterImage.style.display =
         "none";
 
 
-    eventScreen.style.display =
+    eventOverlay.style.display =
         "flex";
 
 
@@ -1254,66 +1268,70 @@ function playEvent(
 
     const duration =
         Number(
-            entry.duration ||
-            1000
-        );
+            entry.duration
+        ) || 1000;
 
+
+    /*
+       Screen shake
+    */
 
     if (
         entry.eventType ===
         "shake"
     ) {
 
-        shakeEvent(
+        shakeScreen(
             duration
         );
-
-        return;
 
     }
 
 
-    if (
-        entry.eventType ===
-        "laugh"
-    ) {
+    /*
+       Laugh event
 
-        laughEvent(
-            duration
-        );
-
-        return;
-
-    }
-
+       For now this waits for the event
+       duration. You can later give events
+       their own audio/animation.
+    */
 
     setTimeout(
-        finishEvent,
+        function() {
+
+            eventOverlay.style.display =
+                "none";
+
+
+            advance();
+
+        },
         duration
     );
 
 }
 
 
-/* ==================================================
-   SHAKE EVENT
-================================================== */
+/* ==========================================
+   SCREEN SHAKE
+========================================== */
 
-function shakeEvent(
-    duration
-) {
+function shakeScreen(duration) {
+
+    const game =
+        document.getElementById(
+            "game"
+        );
 
 
     const start =
-        Date.now();
+        performance.now();
 
 
-    function animate() {
-
+    function shake(time) {
 
         const elapsed =
-            Date.now() -
-            start;
+            time - start;
 
 
         if (
@@ -1321,248 +1339,189 @@ function shakeEvent(
             duration
         ) {
 
-
-            document.body.style.transform =
+            game.style.transform =
                 "";
-
-
-            finishEvent();
-
 
             return;
 
         }
 
 
+        const strength =
+            7;
+
+
         const x =
-            (
-                Math.random() -
-                0.5
-            ) * 14;
+            (Math.random() - 0.5)
+            * strength;
 
 
         const y =
-            (
-                Math.random() -
-                0.5
-            ) * 14;
+            (Math.random() - 0.5)
+            * strength;
 
 
-        document.body.style.transform =
+        game.style.transform =
             `translate(${x}px, ${y}px)`;
 
 
         requestAnimationFrame(
-            animate
+            shake
         );
 
     }
 
 
-    animate();
+    requestAnimationFrame(
+        shake
+    );
 
 }
 
 
-/* ==================================================
-   LAUGH EVENT
-================================================== */
+/* ==========================================
+   ADVANCE
+========================================== */
 
-function laughEvent(
-    duration
-) {
-
-
-    const start =
-        Date.now();
-
-
-    function animate() {
-
-
-        const elapsed =
-            Date.now() -
-            start;
-
-
-        if (
-            elapsed >=
-            duration
-        ) {
-
-
-            document.body.style.transform =
-                "";
-
-
-            finishEvent();
-
-
-            return;
-
-        }
-
-
-        const x =
-            Math.sin(
-                elapsed / 40
-            ) * 5;
-
-
-        document.body.style.transform =
-            `translateX(${x}px)`;
-
-
-        requestAnimationFrame(
-            animate
-        );
-
-    }
-
-
-    animate();
-
-}
-
-
-/* ==================================================
-   FINISH EVENT
-================================================== */
-
-function finishEvent() {
-
-
-    document.body.style.transform =
-        "";
-
-
-    eventScreen.style.display =
-        "none";
-
-
-    eventRunning =
-        false;
-
+function advance() {
 
     currentIndex++;
 
-
-    playCurrent();
+    playCurrentEntry();
 
 }
 
 
-/* ==================================================
+/* ==========================================
    FINISH
-================================================== */
+========================================== */
 
-function finish() {
+function finishDialogue() {
 
+    stopVoice();
 
-    clearTimeout(
-        typingTimer
-    );
-
-
-    typing =
-        false;
+    clearTyping();
 
 
-    eventRunning =
-        false;
+    dialogueText.textContent =
+        "";
 
 
-    dialogue.style.display =
+    characterImage.style.display =
         "none";
 
 
-    eventScreen.style.display =
+    continueIndicator.style.display =
         "none";
+
+
+    eventOverlay.style.display =
+        "none";
+
+
+    /*
+       Leave the screen black when the
+       dialogue is finished.
+    */
 
 }
 
 
-/* ==================================================
-   ENTER KEY
-================================================== */
+/* ==========================================
+   INPUT
+========================================== */
+
+function handleAdvance() {
+
+    /*
+       First tap/Enter finishes typing.
+       It does NOT immediately skip to the
+       next dialogue.
+    */
+
+    if (
+        skipTyping()
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       Text is already finished, so advance.
+    */
+
+    advance();
+
+}
+
+
+/* Keyboard */
 
 document.addEventListener(
     "keydown",
     function(event) {
 
-
         if (
-            event.key !==
+            event.key ===
             "Enter"
         ) {
 
-            return;
+            event.preventDefault();
+
+            handleAdvance();
 
         }
-
-
-        event.preventDefault();
-
-
-        advance();
 
     }
 );
 
 
-/* ==================================================
-   TOUCH
-================================================== */
+/* Mobile tap */
 
-document.addEventListener(
-    "pointerdown",
+document.getElementById(
+    "game"
+).addEventListener(
+    "click",
     function(event) {
 
+        /*
+           Don't treat the Start button as
+           a dialogue tap.
+        */
 
         if (
-            event.target.closest(
-                "#startScreen"
-            )
+            startScreen.style.display !==
+            "none"
         ) {
-
-            startGame();
 
             return;
 
         }
 
 
-        advance();
+        handleAdvance();
 
     }
 );
 
 
-/* ==================================================
-   START SCREEN
-================================================== */
+/* ==========================================
+   INITIALIZE
+========================================== */
 
-startScreen.addEventListener(
-    "click",
-    function() {
+if (
+    loadProject()
+) {
 
-        startGame();
+    /*
+       Project loaded successfully.
+       Wait for the user to tap Start so
+       mobile browsers allow audio playback.
+    */
 
-    }
-);
-
-
-/* ==================================================
-   INITIAL STATE
-================================================== */
-
-dialogue.style.display =
-    "none";
-
-
-eventScreen.style.display =
-    "none";
-
+}
 
 </script>
 
