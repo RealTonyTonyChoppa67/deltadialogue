@@ -14,10 +14,6 @@
 
 <style>
 
-/* =========================================
-   GENERAL
-========================================= */
-
 * {
     box-sizing: border-box;
 }
@@ -200,7 +196,7 @@ body {
 
 
 /* =========================================
-   EVENT SCREEN
+   EVENTS
 ========================================= */
 
 #eventScreen {
@@ -242,6 +238,53 @@ body {
 
 
 /* =========================================
+   START SCREEN
+========================================= */
+
+#startScreen {
+
+    position: absolute;
+
+    inset: 0;
+
+    background: black;
+
+    z-index: 100;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-family:
+        "8-bit Operator JVE",
+        "Courier New",
+        monospace;
+
+    cursor: pointer;
+
+}
+
+
+#startText {
+
+    font-size:
+        clamp(
+            16px,
+            4vw,
+            30px
+        );
+
+    animation:
+        blink 1s infinite;
+
+}
+
+
+/* =========================================
    MOBILE
 ========================================= */
 
@@ -255,6 +298,7 @@ body {
 
     }
 
+
     .text {
 
         font-size:
@@ -265,6 +309,7 @@ body {
             );
 
     }
+
 
     .character {
 
@@ -283,6 +328,21 @@ body {
 
 
 <div id="game">
+
+
+    <!-- =====================================
+         START SCREEN
+    ====================================== -->
+
+    <div
+        id="startScreen"
+    >
+
+        <div id="startText">
+            TAP TO START
+        </div>
+
+    </div>
 
 
     <!-- =====================================
@@ -325,7 +385,7 @@ body {
 
 
     <!-- =====================================
-         EVENTS
+         EVENT SCREEN
     ====================================== -->
 
     <div
@@ -403,170 +463,76 @@ const characters = {
 
 
 /* ==================================================
-   VOICE FILES
+   VOICE SOURCES
 ==================================================
 
-   These are relative paths.
-
-   Your repository should contain:
-
-   sounds/
-       susie.ogg
-       ralsei.ogg
-
+   The OGG files are directly beside play.html.
 ================================================== */
 
-const voiceFiles = {
+const voiceSources = {
 
     susie:
-        "susie.ogg",
+        new Audio("susie.ogg"),
 
     ralsei:
-        "ralsei.ogg"
+        new Audio("ralsei.ogg")
 
 };
 
 
-/* ==================================================
-   VOICE AUDIO POOLS
-==================================================
+voiceSources.susie.preload =
+    "auto";
 
-   Four audio objects per character.
-
-   This prevents the audio from constantly
-   restarting the exact same audio object.
-
-================================================== */
-
-const voicePools = {
-
-    susie: [],
-
-    ralsei: []
-
-};
+voiceSources.ralsei.preload =
+    "auto";
 
 
-const voicePoolPosition = {
+voiceSources.susie.volume =
+    0.25;
 
-    susie: 0,
-
-    ralsei: 0
-
-};
-
-
-const VOICE_VOLUME =
+voiceSources.ralsei.volume =
     0.25;
 
 
-for (
-    let i = 0;
-    i < 4;
-    i++
-) {
-
-
-    const susieAudio =
-        new Audio(
-            voiceFiles.susie
-        );
-
-
-    susieAudio.preload =
-        "auto";
-
-
-    susieAudio.volume =
-        VOICE_VOLUME;
-
-
-    voicePools.susie.push(
-        susieAudio
-    );
-
-
-    const ralseiAudio =
-        new Audio(
-            voiceFiles.ralsei
-        );
-
-
-    ralseiAudio.preload =
-        "auto";
-
-
-    ralseiAudio.volume =
-        VOICE_VOLUME;
-
-
-    voicePools.ralsei.push(
-        ralseiAudio
-    );
-
-}
-
-
 /* ==================================================
-   PLAY VOICE
+   VOICE PLAYBACK
+==================================================
+
+   Every letter gets its own cloned audio
+   instance.
+
 ================================================== */
 
 function playVoice(
     characterName
 ) {
 
-    const pool =
-        voicePools[
+    const source =
+        voiceSources[
             characterName
         ];
 
 
-    if (
-        !pool ||
-        pool.length === 0
-    ) {
+    if (!source) {
 
         return;
 
     }
 
 
-    const position =
-        voicePoolPosition[
-            characterName
-        ];
-
-
     const audio =
-        pool[position];
+        source.cloneNode(
+            true
+        );
 
 
-    voicePoolPosition[
-        characterName
-    ] =
-        (
-            position + 1
-        ) %
-        pool.length;
+    audio.volume =
+        0.25;
 
-
-    audio.pause();
-
-    audio.currentTime =
-        0;
-
-
-    /*
-       Tiny random pitch variation.
-    */
 
     audio.playbackRate =
         0.95 +
         Math.random() * 0.10;
-
-
-    audio.volume =
-        VOICE_VOLUME;
 
 
     audio.play()
@@ -574,41 +540,24 @@ function playVoice(
             () => {}
         );
 
-}
 
+    audio.addEventListener(
+        "ended",
+        function() {
 
-/* ==================================================
-   STOP ALL VOICES
-================================================== */
+            audio.remove();
 
-function stopAllVoices() {
-
-    Object.values(
-        voicePools
-    ).forEach(
-        pool => {
-
-            pool.forEach(
-                audio => {
-
-                    audio.pause();
-
-                    audio.currentTime =
-                        0;
-
-                }
-
-            );
-
+        },
+        {
+            once: true
         }
-
     );
 
 }
 
 
 /* ==================================================
-   PROJECT DATA
+   PROJECT
 ================================================== */
 
 const savedProject =
@@ -634,9 +583,8 @@ if (!savedProject) {
 
     `;
 
-
     throw new Error(
-        "No dialogue project found"
+        "No dialogue project"
     );
 
 }
@@ -665,12 +613,11 @@ catch {
             padding:40px;
         ">
 
-            The dialogue project is invalid.
+            Invalid dialogue project.
 
         </div>
 
     `;
-
 
     throw new Error(
         "Invalid dialogue project"
@@ -690,34 +637,37 @@ const sequence =
 let currentIndex =
     0;
 
-
 let currentCharacter =
     "susie";
-
 
 let currentFullText =
     "";
 
-
 let textPosition =
     0;
-
 
 let typing =
     false;
 
-
 let typingTimer =
     null;
 
-
 let eventRunning =
+    false;
+
+let gameStarted =
     false;
 
 
 /* ==================================================
    ELEMENTS
 ================================================== */
+
+const startScreen =
+    document.getElementById(
+        "startScreen"
+    );
+
 
 const dialogue =
     document.getElementById(
@@ -753,6 +703,43 @@ const eventText =
     document.getElementById(
         "eventText"
     );
+
+
+/* ==================================================
+   START GAME
+================================================== */
+
+function startGame() {
+
+    if (gameStarted) {
+
+        return;
+
+    }
+
+
+    gameStarted =
+        true;
+
+
+    startScreen.style.display =
+        "none";
+
+
+    /*
+       Loading the audio here means the
+       browser has already received a
+       user interaction.
+    */
+
+    voiceSources.susie.load();
+
+    voiceSources.ralsei.load();
+
+
+    playCurrent();
+
+}
 
 
 /* ==================================================
@@ -806,11 +793,6 @@ function playCurrent() {
 
     }
 
-
-    /*
-       Unknown entry type.
-       Skip it rather than getting stuck.
-    */
 
     currentIndex++;
 
@@ -894,7 +876,7 @@ function playDialogue(
 
 
 /* ==================================================
-   TYPE NEXT CHARACTER
+   TYPE CHARACTER
 ================================================== */
 
 function typeNextCharacter() {
@@ -925,11 +907,9 @@ function typeNextCharacter() {
 
 
     /*
-       Play voice for letters
-       and numbers.
+       Letters and numbers get voice.
 
-       Spaces and punctuation
-       remain silent.
+       Spaces and punctuation are silent.
     */
 
     if (
@@ -948,17 +928,16 @@ function typeNextCharacter() {
 
 
     /*
-       65ms typing speed.
+       Text speed.
 
-       Your sounds are 100ms long,
-       so they overlap slightly,
-       which gives the chunky voice effect.
+       45ms gives a fast,
+       Deltarune-like feeling.
     */
 
     typingTimer =
         setTimeout(
             typeNextCharacter,
-            65
+            45
         );
 
 }
@@ -990,14 +969,6 @@ function finishTyping() {
     indicator.style.display =
         "block";
 
-
-    /*
-       Stop any leftover voice
-       clips after the text is done.
-    */
-
-    stopAllVoices();
-
 }
 
 
@@ -1007,10 +978,14 @@ function finishTyping() {
 
 function advance() {
 
-    /*
-       Never advance while an
-       event is running.
-    */
+    if (!gameStarted) {
+
+        startGame();
+
+        return;
+
+    }
+
 
     if (eventRunning) {
 
@@ -1021,7 +996,7 @@ function advance() {
 
     /*
        If the text is still typing,
-       instantly finish it.
+       finish it instantly.
     */
 
     if (typing) {
@@ -1047,9 +1022,6 @@ function advance() {
             "block";
 
 
-        stopAllVoices();
-
-
         return;
 
     }
@@ -1057,9 +1029,6 @@ function advance() {
 
     indicator.style.display =
         "none";
-
-
-    stopAllVoices();
 
 
     currentIndex++;
@@ -1138,7 +1107,7 @@ function playEvent(
 
 
 /* ==================================================
-   SHAKE EVENT
+   SHAKE
 ================================================== */
 
 function shakeEvent(
@@ -1204,7 +1173,7 @@ function shakeEvent(
 
 
 /* ==================================================
-   LAUGH EVENT
+   LAUGH
 ================================================== */
 
 function laughEvent(
@@ -1288,7 +1257,7 @@ function finishEvent() {
 
 
 /* ==================================================
-   FINISH PROJECT
+   FINISH
 ================================================== */
 
 function finish() {
@@ -1304,9 +1273,6 @@ function finish() {
 
     eventRunning =
         false;
-
-
-    stopAllVoices();
 
 
     dialogue.style.display =
@@ -1347,24 +1313,20 @@ document.addEventListener(
 
 
 /* ==================================================
-   MOBILE TOUCH
+   MOBILE / TOUCH
 ================================================== */
 
 document.addEventListener(
     "pointerdown",
     function(event) {
 
-        /*
-           Don't let buttons or other
-           interface elements accidentally
-           advance the dialogue.
-        */
-
         if (
             event.target.closest(
-                "button"
+                "#startScreen"
             )
         ) {
+
+            startGame();
 
             return;
 
@@ -1378,22 +1340,29 @@ document.addEventListener(
 
 
 /* ==================================================
-   START
+   START SCREEN CLICK
 ================================================== */
 
-if (
-    sequence.length > 0
-) {
+startScreen.addEventListener(
+    "click",
+    function() {
 
-    playCurrent();
+        startGame();
 
-}
+    }
+);
 
-else {
 
-    finish();
+/* ==================================================
+   INITIAL STATE
+================================================== */
 
-}
+dialogue.style.display =
+    "none";
+
+eventScreen.style.display =
+    "none";
+
 
 </script>
 
